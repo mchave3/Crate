@@ -600,33 +600,44 @@ Add-BuildTask Build {
 #Synopsis: Invokes all Pester Integration Tests in the Tests\Integration folder (if it exists)
 Add-BuildTask IntegrationTest {
     if (Test-Path -Path $script:IntegrationTestsPath) {
-        Write-Build White "      Importing desired Pester version. Min: $script:MinPesterVersion Max: $script:MaxPesterVersion"
-        Remove-Module -Name Pester -Force -ErrorAction SilentlyContinue # there are instances where some containers have Pester already in the session
-        Import-Module -Name Pester -MinimumVersion $script:MinPesterVersion -MaximumVersion $script:MaxPesterVersion -ErrorAction 'Stop'
+        # Check if there are actual test files (*.Tests.ps1) in the integration test path
+        $integrationTestFiles = Get-ChildItem -Path $script:IntegrationTestsPath -Filter "*.Tests.ps1" -Recurse
 
-        Write-Build White "      Performing Pester Integration Tests in $($invokePesterParams.path)"
+        if ($integrationTestFiles.Count -gt 0) {
+            Write-Build White "      Importing desired Pester version. Min: $script:MinPesterVersion Max: $script:MaxPesterVersion"
+            Remove-Module -Name Pester -Force -ErrorAction SilentlyContinue # there are instances where some containers have Pester already in the session
+            Import-Module -Name Pester -MinimumVersion $script:MinPesterVersion -MaximumVersion $script:MaxPesterVersion -ErrorAction 'Stop'
 
-        $pesterConfiguration = New-PesterConfiguration
-        $pesterConfiguration.run.Path = $script:IntegrationTestsPath
-        $pesterConfiguration.Run.PassThru = $true
-        $pesterConfiguration.Run.Exit = $false
-        $pesterConfiguration.CodeCoverage.Enabled = $false
-        $pesterConfiguration.TestResult.Enabled = $false
-        $pesterConfiguration.Output.Verbosity = 'Detailed'
+            Write-Build White "      Performing Pester Integration Tests in $script:IntegrationTestsPath"
 
-        $testResults = Invoke-Pester -Configuration $pesterConfiguration
-        # This will output a nice json for each failed test (if running in CodeBuild)
-        if ($env:CODEBUILD_BUILD_ARN) {
-            $testResults.TestResult | ForEach-Object {
-                if ($_.Result -ne 'Passed') {
-                    ConvertTo-Json -InputObject $_ -Compress
+            $pesterConfiguration = New-PesterConfiguration
+            $pesterConfiguration.run.Path = $script:IntegrationTestsPath
+            $pesterConfiguration.Run.PassThru = $true
+            $pesterConfiguration.Run.Exit = $false
+            $pesterConfiguration.CodeCoverage.Enabled = $false
+            $pesterConfiguration.TestResult.Enabled = $false
+            $pesterConfiguration.Output.Verbosity = 'Detailed'
+
+            $testResults = Invoke-Pester -Configuration $pesterConfiguration
+            # This will output a nice json for each failed test (if running in CodeBuild)
+            if ($env:CODEBUILD_BUILD_ARN) {
+                $testResults.TestResult | ForEach-Object {
+                    if ($_.Result -ne 'Passed') {
+                        ConvertTo-Json -InputObject $_ -Compress
+                    }
                 }
             }
-        }
 
-        $numberFails = $testResults.FailedCount
-        Assert-Build($numberFails -eq 0) ('Failed "{0}" unit tests.' -f $numberFails)
-        Write-Build Green '      ...Pester Integration Tests Complete!'
+            $numberFails = $testResults.FailedCount
+            Assert-Build($numberFails -eq 0) ('Failed "{0}" integration tests.' -f $numberFails)
+            Write-Build Green '      ...Pester Integration Tests Complete!'
+        }
+        else {
+            Write-Build Yellow '      No integration test files found (*.Tests.ps1). Skipping integration tests...'
+        }
+    }
+    else {
+        Write-Build Yellow '      Integration tests directory not found. Skipping integration tests...'
     }
 } #IntegrationTest
 
