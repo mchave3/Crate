@@ -47,11 +47,10 @@ function Show-CrateMenu {
 
         do {
             Clear-Host
-
             # Display header
             Write-Host ""
             Write-Host "🚀 $Title" -ForegroundColor White -BackgroundColor DarkBlue
-            Write-Host "─" * ($Title.Length + 4) -ForegroundColor DarkGray
+            Write-Host ("─" * ($Title.Length + 4)) -ForegroundColor DarkGray
             Write-Host ""
 
             # Display options
