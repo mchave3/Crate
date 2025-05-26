@@ -104,7 +104,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/mchave3/Crate'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://raw.githubusercontent.com/mchave3/Crate/main/media/Crate_256px.png'
 
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/mchave3/Crate/blob/main/docs/CHANGELOG.md'
