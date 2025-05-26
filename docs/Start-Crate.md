@@ -31,24 +31,17 @@ terminal-based experience for Windows system administrators.
 
 ```powershell
 Start-Crate
-Example of how to use this script/function
-```
-
-### EXAMPLE 2
-
-```powershell
-Start-Crate
 Starts Crate with the interactive main menu.
 ```
 
-### EXAMPLE 3
+### EXAMPLE 2
 
 ```powershell
 Start-Crate -WorkspacePath "D:\CrateWorkspace"
 Starts Crate with a custom workspace location.
 ```
 
-### EXAMPLE 4
+### EXAMPLE 3
 
 ```powershell
 Start-Crate -ConfigProfile "Windows11Updates" -AutoMode
@@ -156,10 +149,7 @@ Created:     26/05/2025
 Version:     25.5.26.1
 Repository:  https://github.com/mchave3/Crate
 License:     MIT License
-Requires:    PowerShell 7.4+, Administrator privileges, Windows OS
 
 ## RELATED LINKS
-
-[https://github.com/mchave3/Crate](https://github.com/mchave3/Crate)
 
 [https://github.com/mchave3/Crate](https://github.com/mchave3/Crate)

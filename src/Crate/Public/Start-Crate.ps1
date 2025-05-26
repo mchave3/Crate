@@ -1,27 +1,5 @@
 ﻿<#
 .SYNOPSIS
-    Brief description of the script purpose
-
-.DESCRIPTION
-    Detailed description of what the script/function does
-
-.NOTES
-    Name:        Start-Crate.ps1
-    Author:      Mickaël CHAVE
-    Created:     26/05/2025
-    Version:     25.5.26.1
-    Repository:  https://github.com/mchave3/Crate
-    License:     MIT License
-
-.LINK
-    https://github.com/mchave3/Crate
-
-.EXAMPLE
-    Start-Crate
-    Example of how to use this script/function
-#>
-<#
-.SYNOPSIS
     Main entry point for the Crate Windows ISO provisioning tool.
 
 .DESCRIPTION
@@ -57,11 +35,11 @@
     Version:     25.5.26.1
     Repository:  https://github.com/mchave3/Crate
     License:     MIT License
-    Requires:    PowerShell 7.4+, Administrator privileges, Windows OS
 
 .LINK
     https://github.com/mchave3/Crate
 #>
+
 function Start-Crate {
     [CmdletBinding(SupportsShouldProcess)]
     param(
@@ -192,6 +170,7 @@ function Start-Crate {
     }
 
     end {
+        Clear-Host
         Write-Host "✅ Thank you for using Crate!" -ForegroundColor Green
     }
 }
