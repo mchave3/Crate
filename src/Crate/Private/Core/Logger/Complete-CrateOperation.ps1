@@ -41,12 +41,13 @@ function Complete-CrateOperation {
 
     process {
         if ($Script:CrateLogger) {
-            $Script:CrateLogger.EndOperation($Operation, $Success)
+            # Only log to the logger without console output to avoid duplication with specific success messages
+            $levelValue = if ($Success) { "SUCCESS" } else { "ERROR" }
+            $Script:CrateLogger.Write("Operation completed: $Operation", $levelValue, $false, $true)
         }
         else {
             $level = if ($Success) { "Success" } else { "Error" }
-            $emoji = if ($Success) { "✅" } else { "❌" }
-            Write-CrateLog -Data "$emoji Completed: $Operation" -Level $level
+            Write-CrateLog -Data "Completed: $Operation" -Level $level
         }
     }
 }

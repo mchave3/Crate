@@ -14,8 +14,8 @@ Main entry point for the Crate Windows ISO provisioning tool.
 ## SYNTAX
 
 ```powershell
-Start-Crate [[-WorkspacePath] <String>] [[-ConfigProfile] <String>] [-AutoMode]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+Start-Crate [[-ConfigProfile] <String>] [-AutoMode] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -50,23 +50,6 @@ Runs Crate in automated mode using the specified profile.
 
 ## PARAMETERS
 
-### -WorkspacePath
-
-Custom workspace path for Crate operations.
-Defaults to C:\ProgramData\Crate.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: C:\ProgramData\Crate
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -ConfigProfile
 
 Name of the configuration profile to use.
@@ -77,7 +60,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

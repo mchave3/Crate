@@ -74,37 +74,43 @@ class CrateLogger {
         }
     }
 
-    # Write a log entry to file, console, and buffer
-    [void]Write([string]$message, [string]$level = "INFO", [bool]$forceDisplay = $false) {
+    # Write a log entry to file, console, and buffer with UI-only support
+    [void]Write([string]$message, [string]$level = "INFO", [bool]$forceDisplay = $false, [bool]$noFileLog = $false) {
         $caller = $this.GetCallerName()
-        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+        $timestamp = Get-Date -Format "G"
         $logEntry = "[$timestamp] [$level] [$caller] $message"
 
-        # Always write to log file
-        try {
-            Add-Content -Path $this.LogPath -Value $logEntry -Encoding UTF8
-        }
-        catch {
-            # Fail silently for file logging issues to avoid breaking the application
-            Write-Debug "Failed to write to log file: $($_.Exception.Message)"
+        # Write to log file unless it's a UI-only message
+        if (!$noFileLog) {
+            try {
+                Add-Content -Path $this.LogPath -Value $logEntry -Encoding UTF8
+            }
+            catch {
+                # Fail silently for file logging issues to avoid breaking the application
+                Write-Debug "Failed to write to log file: $($_.Exception.Message)"
+            }
         }
 
         # Display to console based on silent mode and level
-        if (!$this.SilentMode -or $forceDisplay -or $level -in @("ERROR", "WARNING", "FATAL")) {
+        # UI levels (PROMPT, HEADER, SEPARATOR) are always displayed unless in silent mode
+        $isUILevel = $level -in @("PROMPT", "HEADER", "SEPARATOR")
+        if (!$this.SilentMode -or $forceDisplay -or $level -in @("ERROR", "WARNING", "FATAL") -or $isUILevel) {
             $this.WriteToConsole($message, $level)
         }
 
-        # Add to in-memory buffer for UI access
-        $this.Buffer.Enqueue(@{
-                Timestamp = Get-Date
-                Level     = $level
-                Message   = $message
-                Caller    = $caller
-            })
+        # Add to in-memory buffer for UI access (skip UI-only messages from buffer)
+        if (!$noFileLog) {
+            $this.Buffer.Enqueue(@{
+                    Timestamp = Get-Date
+                    Level     = $level
+                    Message   = $message
+                    Caller    = $caller
+                })
 
-        # Maintain buffer size limit
-        while ($this.Buffer.Count -gt 100) {
-            $this.Buffer.Dequeue() | Out-Null
+            # Maintain buffer size limit
+            while ($this.Buffer.Count -gt 100) {
+                $this.Buffer.Dequeue() | Out-Null
+            }
         }
     }
 
@@ -136,6 +142,9 @@ class CrateLogger {
             "DEBUG" { "🐛" }
             "VERBOSE" { "🔍" }
             "FATAL" { "💥" }
+            "PROMPT" { "❓" }
+            "HEADER" { "🚀" }
+            "SEPARATOR" { "" }
             default { "ℹ️" }
         }
 
@@ -147,27 +156,42 @@ class CrateLogger {
             "DEBUG" { "Cyan" }
             "VERBOSE" { "DarkGray" }
             "FATAL" { "Magenta" }
+            "PROMPT" { "Magenta" }
+            "HEADER" { "White" }
+            "SEPARATOR" { "DarkGray" }
             default { "White" }
         }
 
-        Write-Host "$emoji $message" -ForegroundColor $color
+        # Special handling for UI-specific levels
+        if ($level -eq "HEADER") {
+            Write-Host ""
+            Write-Host "$emoji $message" -ForegroundColor $color -BackgroundColor DarkBlue
+            Write-Host ""
+        }
+        elseif ($level -eq "SEPARATOR") {
+            # For separator, ignore the message and always show a line
+            Write-Host ("─" * 60) -ForegroundColor $color
+        }
+        else {
+            Write-Host "$emoji $message" -ForegroundColor $color
+        }
     }
 
     # Log the start of an operation
     [void]StartOperation([string]$operation) {
-        $this.Write("🚀 Starting: $operation", "INFO")
+        $this.Write("🚀 Starting: $operation", "INFO", $false, $false)
     }
 
     # Log the completion of an operation with success status
     [void]EndOperation([string]$operation, [bool]$success = $true) {
         $emoji = if ($success) { "✅" } else { "❌" }
         $levelValue = if ($success) { "SUCCESS" } else { "ERROR" }
-        $this.Write("$emoji Completed: $operation", $levelValue)
+        $this.Write("$emoji Completed: $operation", $levelValue, $false, $false)
     }
 
     # Log a progress message for ongoing operations
     [void]Progress([string]$message) {
-        $this.Write("⏳ $message", "INFO")
+        $this.Write("⏳ $message", "INFO", $false, $false)
     }
 
     # Enable or disable silent mode for UI compatibility

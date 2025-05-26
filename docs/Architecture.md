@@ -12,7 +12,6 @@ Crate/
 │   ├── Initialize-Crate.ps1       # Initialization, admin verification
 │   ├── Write-CrateLog.ps1          # Advanced logging system
 │   ├── Get-CrateConfig.ps1         # Configuration management
-│   ├── Test-CrateRequirement.ps1  # Prerequisites verification
 │   └── Invoke-CrateCleanup.ps1     # Workspace cleanup
 │
 ├── ISO/                    # ISO image management

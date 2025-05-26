@@ -7,9 +7,6 @@
     Windows ISO images with updates and language packs. Provides a modern, intuitive
     terminal-based experience for Windows system administrators.
 
-.PARAMETER WorkspacePath
-    Custom workspace path for Crate operations. Defaults to C:\ProgramData\Crate.
-
 .PARAMETER ConfigProfile
     Name of the configuration profile to use.
 
@@ -44,9 +41,6 @@ function Start-Crate {
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter()]
-        [string]$WorkspacePath = 'C:\ProgramData\Crate',
-
-        [Parameter()]
         [string]$ConfigProfile,
 
         [Parameter()]
@@ -56,28 +50,24 @@ function Start-Crate {
     begin {
         # Clear screen and show welcome banner
         Clear-Host
-        Write-Host ""
-        Write-Host "🚀 Crate - Windows ISO Provisioning Tool v25.5.26.1" -ForegroundColor White -BackgroundColor DarkBlue
-        Write-Host "Modern CLI interface for ISO mounting, provisioning, and dismounting" -ForegroundColor Gray
-        Write-Host "─" * 70 -ForegroundColor DarkGray
-        Write-Host ""
+        Write-CrateLog -Data "Crate - Windows ISO Provisioning Tool v25.5.26.1" -Level "Header" -NoFileLog
+        Write-CrateLog -Data "Modern CLI interface for ISO mounting, provisioning, and dismounting" -Level "Info" -NoFileLog
+        Write-Host ("─" * 60) -ForegroundColor DarkGray
     }
 
     process {
         if ($PSCmdlet.ShouldProcess("Crate", "Start")) {
             try {
                 # Initialize Crate environment
-                Write-Host "ℹ️  Initializing Crate environment..." -ForegroundColor Cyan
-
-                if (-not (Initialize-Crate -WorkspacePath $WorkspacePath)) {
+                if (-not (Initialize-Crate -WorkspacePath "$env:ProgramData\Crate")) {
                     throw "Failed to initialize Crate environment"
                 }
 
                 if ($AutoMode -and $ConfigProfile) {
                     # Run in automated mode
-                    Write-Host "ℹ️  Running in automated mode with profile: $ConfigProfile" -ForegroundColor Cyan
+                    Write-CrateLog -Data "Running in automated mode with profile: $ConfigProfile" -Level "Info"
                     # TODO: Implement automated workflow
-                    Write-Host "⚠️  Automated mode not yet implemented" -ForegroundColor Yellow
+                    Write-CrateLog -Data "Automated mode not yet implemented" -Level "Warning"
                     return
                 }
 
@@ -100,77 +90,84 @@ function Start-Crate {
                     if ($null -eq $selection) {
                         break
                     }
-
                     switch ($selection) {
                         "📀 Mount Windows ISO" {
-                            Write-Host "ℹ️  Starting ISO mount process..." -ForegroundColor Cyan
+                            Start-CrateOperation -Operation "ISO Mount Process"
+                            Write-CrateProgress -Message "Starting ISO mount process"
                             # TODO: Implement ISO mounting workflow
-                            Write-Host "⚠️  ISO mounting not yet implemented" -ForegroundColor Yellow
+                            Write-CrateLog -Data "ISO mounting not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "ISO Mount Process" -Success $false
                             Read-Host "Press Enter to continue"
                         }
                         "🔄 Provision Updates" {
-                            Write-Host "ℹ️  Starting update provisioning..." -ForegroundColor Cyan
+                            Start-CrateOperation -Operation "Update Provisioning"
+                            Write-CrateProgress -Message "Starting update provisioning"
                             # TODO: Implement update provisioning workflow
-                            Write-Host "⚠️  Update provisioning not yet implemented" -ForegroundColor Yellow
+                            Write-CrateLog -Data "Update provisioning not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "Update Provisioning" -Success $false
                             Read-Host "Press Enter to continue"
                         }
                         "🌐 Add Language Packs" {
-                            Write-Host "ℹ️  Starting language pack installation..." -ForegroundColor Cyan
+                            Start-CrateOperation -Operation "Language Pack Installation"
+                            Write-CrateProgress -Message "Starting language pack installation"
                             # TODO: Implement language pack workflow
-                            Write-Host "⚠️  Language pack installation not yet implemented" -ForegroundColor Yellow
+                            Write-CrateLog -Data "Language pack installation not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "Language Pack Installation" -Success $false
                             Read-Host "Press Enter to continue"
                         }
                         "💿 Create Provisioned ISO" {
-                            Write-Host "ℹ️  Creating provisioned ISO..." -ForegroundColor Cyan
+                            Start-CrateOperation -Operation "ISO Creation"
+                            Write-CrateProgress -Message "Creating provisioned ISO"
                             # TODO: Implement ISO creation workflow
-                            Write-Host "⚠️  ISO creation not yet implemented" -ForegroundColor Yellow
+                            Write-CrateLog -Data "ISO creation not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "ISO Creation" -Success $false
                             Read-Host "Press Enter to continue"
                         }
                         "📊 View Current Status" {
-                            Write-Host "ℹ️  Current Crate Status:" -ForegroundColor Cyan
-                            Write-Host "Workspace: $Script:CrateWorkspace" -ForegroundColor Cyan
-                            Write-Host "Initialized: $Script:CrateInitialized" -ForegroundColor Cyan
+                            Write-CrateLog -Data "Current Crate Status:" -Level "Info"
+                            Write-CrateLog -Data "Workspace: $Script:CrateWorkspace" -Level 'Info'
+                            Write-CrateLog -Data "Initialized: $Script:CrateInitialized" -Level 'Info'
                             # TODO: Show detailed status
                             Read-Host "Press Enter to continue"
                         }
                         "⚙️  Configuration" {
-                            Write-Host "ℹ️  Configuration management..." -ForegroundColor Cyan
+                            Write-CrateProgress -Message "Opening configuration management"
                             # TODO: Implement configuration menu
-                            Write-Host "⚠️  Configuration management not yet implemented" -ForegroundColor Yellow
+                            Write-CrateLog -Data "Configuration management not yet implemented" -Level "Warning"
                             Read-Host "Press Enter to continue"
                         }
                         "📋 View Logs" {
-                            Write-Host "ℹ️  Opening log viewer..." -ForegroundColor Cyan
+                            Write-CrateProgress -Message "Opening log viewer"
                             # TODO: Implement log viewer
-                            Write-Host "⚠️  Log viewer not yet implemented" -ForegroundColor Yellow
+                            Write-CrateLog -Data "Log viewer not yet implemented" -Level "Warning"
                             Read-Host "Press Enter to continue"
                         }
                         "🧹 Cleanup Workspace" {
-                            Write-Host "⚠️  This will clean temporary files. Continue? (y/N)" -ForegroundColor Yellow
+                            Write-CrateLog -Data "This will clean temporary files. Continue? (y/N)" -Level "Prompt" -NoFileLog
                             $confirm = Read-Host
                             if ($confirm -eq 'y' -or $confirm -eq 'Y') {
+                                Start-CrateOperation -Operation "Workspace Cleanup"
                                 # TODO: Implement cleanup
-                                Write-Host "✅ Workspace cleaned successfully" -ForegroundColor Green
+                                Write-CrateLog -Data "Workspace cleaned successfully" -Level "Success"
+                                Complete-CrateOperation -Operation "Workspace Cleanup" -Success $true
                             }
                             Read-Host "Press Enter to continue"
                         }
                         "❌ Exit" {
-                            Write-Host "ℹ️  Exiting Crate..." -ForegroundColor Cyan
+                            Write-CrateProgress -Message "Exiting Crate"
                             return
                         }
                     }
                 } while ($true)
             }
             catch {
-                Write-Host "❌ An error occurred: $($_.Exception.Message)" -ForegroundColor Red
                 Write-CrateLog -Data "Error in Start-Crate: $($_.Exception.Message)" -Level 'Error'
                 throw
             }
         }
     }
-
     end {
         Clear-Host
-        Write-Host "✅ Thank you for using Crate!" -ForegroundColor Green
+        Write-CrateLog -Data "Thank you for using Crate!" -Level 'Success'
     }
 }

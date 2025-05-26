@@ -79,7 +79,10 @@ function Show-CrateProgress {
             Write-Host "🔄 Starting: $Activity" -ForegroundColor Cyan
         }
         elseif ($PercentComplete -eq 100) {
-            Write-Host "✅ Completed: $Activity" -ForegroundColor Green
+            # Only show completion message if CrateLogger is not active to avoid duplication
+            if (-not $Script:CrateLogger) {
+                Write-Host "✅ Completed: $Activity" -ForegroundColor Green
+            }
             Write-Progress -Activity $Activity -Completed -Id $Id
         }
     }

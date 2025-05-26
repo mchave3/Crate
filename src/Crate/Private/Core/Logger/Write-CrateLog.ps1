@@ -27,9 +27,16 @@
 .PARAMETER Force
     Forces the log entry to be written even if normally filtered
 
+.PARAMETER NoFileLog
+    Prevents writing to the log file (UI-only output)
+
 .EXAMPLE
     Write-CrateLog -Data "Operation completed successfully" -Level "Success"
     Logs a success message
+
+.EXAMPLE
+    Write-CrateLog -Data "Select an option:" -Level "Prompt" -NoFileLog
+    Displays a UI prompt without logging to file
 #>
 
 function Write-CrateLog {
@@ -41,11 +48,14 @@ function Write-CrateLog {
         [string]$Data,
 
         [Parameter()]
-        [ValidateSet("Verbose", "Debug", "Info", "Warning", "Error", "Fatal", "Success")]
+        [ValidateSet("Verbose", "Debug", "Info", "Warning", "Error", "Fatal", "Success", "Prompt", "Header", "Separator")]
         [string]$Level = "Info",
 
         [Parameter()]
-        [switch]$Force
+        [switch]$Force,
+
+        [Parameter()]
+        [switch]$NoFileLog
     )
 
     process {
@@ -54,15 +64,34 @@ function Write-CrateLog {
 
         # Initialize logger if not exists
         if (!$Script:CrateLogger) {
-            $logPath = if ($Script:CrateWorkspace) {
-                Join-Path $Script:CrateWorkspace "Logs\Crate_$(Get-Date -Format 'yyyyMMdd').log"
+            try {
+                Write-Debug "CrateWorkspace value: '$Script:CrateWorkspace'"
+                $logPath = if ($Script:CrateWorkspace) {
+                    Join-Path $Script:CrateWorkspace "Logs\Crate_$(Get-Date -Format 'yyyyMMdd').log"
+                }
+                else {
+                    "$env:TEMP\Crate_$(Get-Date -Format 'yyyyMMdd').log"
+                }
+
+                Write-Debug "Creating CrateLogger with path: $logPath"
+                $Script:CrateLogger = [CrateLogger]::new($logPath)
+                Write-Debug "CrateLogger created successfully"
             }
-            else {
-                "$env:TEMP\Crate_$(Get-Date -Format 'yyyyMMdd').log"
+            catch {
+                Write-Error "Failed to create CrateLogger: $($_.Exception.Message)"
+                # Fallback to simple console output
+                Write-Host "[$normalizedLevel] $Data" -ForegroundColor Yellow
+                return
             }
-            $Script:CrateLogger = [CrateLogger]::new($logPath)
         }
 
-        $Script:CrateLogger.Write($Data, $normalizedLevel, $Force.IsPresent)
+        try {
+            $Script:CrateLogger.Write($Data, $normalizedLevel, $Force.IsPresent, $NoFileLog.IsPresent)
+        }
+        catch {
+            Write-Error "Failed to write to CrateLogger: $($_.Exception.Message)"
+            # Fallback to simple console output
+            Write-Host "[$normalizedLevel] $Data" -ForegroundColor Yellow
+        }
     }
 }
