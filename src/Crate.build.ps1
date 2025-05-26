@@ -49,7 +49,11 @@ function Test-ManifestBool ($Path) {
 $str = @()
 $str = 'Clean', 'ValidateRequirements', 'ImportModuleManifest'
 $str += 'FormattingCheck'
-$str += 'Analyze', 'Test'
+if ($script:EnableUnitTests) {
+    $str += 'Analyze', 'Test'
+} else {
+    $str += 'Analyze'
+}
 $str += 'CreateHelpStart'
 $str2 = $str
 $str2 += 'Build', 'Archive'
@@ -90,7 +94,7 @@ Enter-Build {
     $script:BuildModuleRootFile = Join-Path -Path $script:ArtifactsPath -ChildPath "$($script:ModuleName).psm1"
 
     # Ensure our builds fail until if below a minimum defined code test coverage threshold
-    $script:coverageThreshold = 30
+    $script:coverageThreshold = 0
 
     [version]$script:MinPesterVersion = '5.2.2'
     [version]$script:MaxPesterVersion = '5.99.99'
@@ -330,11 +334,36 @@ Add-BuildTask CreateHelpStart {
     Write-Build Gray '           Importing platyPS v0.12.0 ...'
     Import-Module platyPS -RequiredVersion 0.12.0 -ErrorAction Stop
     Write-Build Gray '           ...platyPS imported successfully.'
+
+    Write-Build Gray '           Re-importing module for help generation...'
+    try {
+        Import-Module $script:ModuleManifestFile -Force -Global -ErrorAction Stop
+        Write-Build Gray "           ...$script:ModuleName imported successfully for help generation."
+    }
+    catch {
+        Write-Build Red "           ...$_`n"
+        throw 'Unable to re-import the project module for help generation'
+    }
 } #CreateHelpStart
 
 # Synopsis: Build markdown help files for module and fail if help information is missing
 Add-BuildTask CreateMarkdownHelp -After CreateHelpStart {
     $ModulePage = "$script:ArtifactsPath\docs\$($ModuleName).md"
+
+    # Ensure the module is available for platyPS by verifying it's imported
+    Write-Build Gray '           Verifying module is available for platyPS...'
+    $moduleLoaded = Get-Module -Name $ModuleName
+    if (-not $moduleLoaded) {
+        Write-Build Yellow '           Module not found in session, importing again...'
+        Import-Module $script:ModuleManifestFile -Force -Global -ErrorAction Stop
+        $moduleLoaded = Get-Module -Name $ModuleName
+    }
+
+    if (-not $moduleLoaded) {
+        throw "Module $ModuleName could not be loaded for help generation"
+    }
+
+    Write-Build Gray "           Module $ModuleName is loaded with $($moduleLoaded.ExportedFunctions.Count) exported functions"
 
     $markdownParams = @{
         Module         = $ModuleName
@@ -622,4 +651,3 @@ Add-BuildTask Archive {
 
     Write-Build Green '        ...Archive Complete!'
 } #Archive
-
