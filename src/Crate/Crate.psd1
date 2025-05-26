@@ -33,7 +33,7 @@ Copyright = '(c) Mickaël CHAVE. All rights reserved.'
 Description = 'My awesome module is awesome'
 
 # Minimum version of the PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '7.4'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -98,16 +98,16 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/mchave3/Crate/blob/main/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/mchave3/Crate'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = 'https://github.com/mchave3/Crate/blob/main/docs/CHANGELOG.md'
 
         # Prerelease string of this module
         # Prerelease = ''
@@ -129,5 +129,3 @@ PrivateData = @{
 # DefaultCommandPrefix = ''
 
 }
-
-
