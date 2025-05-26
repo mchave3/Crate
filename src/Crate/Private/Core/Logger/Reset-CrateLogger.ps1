@@ -24,6 +24,7 @@
 #>
 function Reset-CrateLogger {
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([void])]
     param()
 
     process {

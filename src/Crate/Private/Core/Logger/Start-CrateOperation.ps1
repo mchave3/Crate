@@ -27,6 +27,7 @@
 #>
 function Start-CrateOperation {
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory = $true)]
         [string]$Operation

@@ -34,6 +34,7 @@
 
 function Write-CrateLog {
     [CmdletBinding()]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [Alias("Message")]

@@ -27,6 +27,7 @@
 #>
 function Write-CrateProgress {
     [CmdletBinding()]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory = $true)]
         [string]$Message

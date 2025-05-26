@@ -30,6 +30,7 @@
 #>
 function Complete-CrateOperation {
     [CmdletBinding()]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory = $true)]
         [string]$Operation,

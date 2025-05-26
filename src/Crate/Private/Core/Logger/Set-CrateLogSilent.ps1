@@ -27,6 +27,7 @@
 #>
 function Set-CrateLogSilent {
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([void])]
     param(
         [Parameter(Mandatory = $true)]
         [bool]$Silent
