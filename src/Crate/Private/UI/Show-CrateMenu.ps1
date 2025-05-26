@@ -80,19 +80,20 @@ function Show-CrateMenu {
             }
             else {
                 Write-Host "Navigation: ↑/↓ arrows, Enter to select, Q to quit" -ForegroundColor DarkGray
-            }
-
-            # Get user input
+            }            # Get user input
             $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
             switch ($key.VirtualKeyCode) {
-                38 { # Up arrow
+                38 {
+                    # Up arrow
                     $selectedIndex = if ($selectedIndex -gt 0) { $selectedIndex - 1 } else { $Options.Length - 1 }
                 }
-                40 { # Down arrow
+                40 {
+                    # Down arrow
                     $selectedIndex = if ($selectedIndex -lt ($Options.Length - 1)) { $selectedIndex + 1 } else { 0 }
                 }
-                32 { # Space (for multiple selection)
+                32 {
+                    # Space (for multiple selection)
                     if ($AllowMultipleSelection) {
                         if ($selectedItems -contains $selectedIndex) {
                             $selectedItems = $selectedItems | Where-Object { $_ -ne $selectedIndex }
@@ -102,7 +103,8 @@ function Show-CrateMenu {
                         }
                     }
                 }
-                13 { # Enter
+                13 {
+                    # Enter
                     if ($AllowMultipleSelection) {
                         return $selectedItems | ForEach-Object { $Options[$_] }
                     }
@@ -110,7 +112,8 @@ function Show-CrateMenu {
                         return $Options[$selectedIndex]
                     }
                 }
-                81 { # Q
+                81 {
+                    # Q
                     return $null
                 }
             }

@@ -8,8 +8,8 @@ Locale: en-US
 
 # Crate Module
 ## Description
-My awesome module is awesome
+Windows ISO Provisioning Tool - Modern CLI interface for mounting, provisioning, and dismounting ISO images with updates and language packs
 
 ## Crate Cmdlets
 ### [Start-Crate](Start-Crate.md)
-Brief description of the script purpose
+Main entry point for the Crate Windows ISO provisioning tool.

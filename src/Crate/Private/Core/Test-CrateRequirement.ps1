@@ -28,7 +28,7 @@
     Only checks if running with administrative privileges.
 
 .NOTES
-    Name:        Test-CrateRequirements.ps1
+    Name:        Test-CrateRequirement.ps1
     Author:      Mickaël CHAVE
     Created:     26/05/2025
     Version:     25.5.26.1

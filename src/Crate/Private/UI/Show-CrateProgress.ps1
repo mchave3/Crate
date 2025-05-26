@@ -56,19 +56,12 @@ function Show-CrateProgress {
     )
 
     process {
-        # Create modern progress bar visualization
-        $barWidth = 40
-        $completedWidth = [math]::Floor(($PercentComplete / 100) * $barWidth)
-        $remainingWidth = $barWidth - $completedWidth
-
-        $progressBar = "█" * $completedWidth + "░" * $remainingWidth
-
         # Enhanced Write-Progress with modern styling
         $progressParams = @{
-            Activity = "🔄 $Activity"
-            Status = $Status
+            Activity        = "🔄 $Activity"
+            Status          = $Status
             PercentComplete = $PercentComplete
-            Id = $Id
+            Id              = $Id
         }
 
         if ($CurrentOperation) {

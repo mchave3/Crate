@@ -150,8 +150,8 @@ function Start-Crate {
                         }
                         "📊 View Current Status" {
                             Write-Host "ℹ️  Current Crate Status:" -ForegroundColor Cyan
-                            Write-Host "Workspace: $global:CrateWorkspace" -ForegroundColor Cyan
-                            Write-Host "Initialized: $global:CrateInitialized" -ForegroundColor Cyan
+                            Write-Host "Workspace: $Script:CrateWorkspace" -ForegroundColor Cyan
+                            Write-Host "Initialized: $Script:CrateInitialized" -ForegroundColor Cyan
                             # TODO: Show detailed status
                             Read-Host "Press Enter to continue"
                         }

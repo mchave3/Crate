@@ -10,7 +10,8 @@
         'PSAvoidUsingInvokeExpression',
         'PSUseToExportFieldsInManifest',
         'PSReviewUnusedParameter',
-        'PSAvoidAssignmentToAutomaticVariable'
+        'PSAvoidAssignmentToAutomaticVariable',
+        'PSUseBOMForUnicodeEncodedFile'
     )
     #IncludeRules = @(
     #    'PSAvoidUsingWriteHost',

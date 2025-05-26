@@ -27,8 +27,6 @@
     Version:     25.5.26.1
     Repository:  https://github.com/mchave3/Crate
     License:     MIT License
-    Requires administrative privileges.
-    Creates workspace structure if it doesn't exist.
 
 .LINK
     https://github.com/mchave3/Crate
@@ -85,14 +83,14 @@ function Initialize-Crate {
             $configPath = Join-Path $WorkspacePath 'Config\settings.json'
             if (-not (Test-Path $configPath) -or $Force) {
                 $defaultConfig = @{
-                    WorkspacePath = $WorkspacePath
-                    LogLevel = 'Info'
-                    MaxLogFiles = 10
-                    AutoCleanup = $true
-                    BackupEnabled = $true
+                    WorkspacePath  = $WorkspacePath
+                    LogLevel       = 'Info'
+                    MaxLogFiles    = 10
+                    AutoCleanup    = $true
+                    BackupEnabled  = $true
                     DefaultProfile = 'Default'
-                    CreatedDate = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
-                    Version = '25.5.26.1'
+                    CreatedDate    = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
+                    Version        = '25.5.26.1'
                 } | ConvertTo-Json -Depth 3
 
                 $defaultConfig | Out-File -FilePath $configPath -Encoding UTF8
@@ -100,8 +98,8 @@ function Initialize-Crate {
             }
 
             # Set global variables
-            $global:CrateWorkspace = $WorkspacePath
-            $global:CrateInitialized = $true
+            $Script:CrateWorkspace = $WorkspacePath
+            $Script:CrateInitialized = $true
 
             Write-CrateLog -Data "Crate initialization completed successfully" -Level 'Info'
             Write-Host "✅ Crate initialized successfully!" -ForegroundColor Green
