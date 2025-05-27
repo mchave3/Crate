@@ -25,30 +25,26 @@ function Show-CrateFooter {
     process {
         try {
             $version = Get-CrateVersion
-            $creditColor = "DarkGray"
-            $versionColor = "Green"
-            $authorColor = "DarkCyan"
+            $creditColor  = "DarkGray"
 
             Write-Host ""
-            Write-Host ("─" * 80) -ForegroundColor DarkGray
+            Write-CenteredHost ("─" * 60) -ForegroundColor DarkGray
             Write-Host ""
 
-            # Credits section
-            Write-Host "  📦 Created by " -ForegroundColor $creditColor -NoNewline
-            Write-Host "Mickaël CHAVE" -ForegroundColor $authorColor -NoNewline
-            Write-Host " | 🌟 Version " -ForegroundColor $creditColor -NoNewline
-            Write-Host $version -ForegroundColor $versionColor
+            # Credits section - centered
+            $creditLine1 = "📦 Created by Mickaël CHAVE | 🌟 Version $version"
+            Write-CenteredHost $creditLine1 -ForegroundColor $creditColor
 
-            Write-Host "  🔗 GitHub: " -ForegroundColor $creditColor -NoNewline
-            Write-Host "https://github.com/mchave3/Crate" -ForegroundColor DarkCyan
+            $creditLine2 = "🔗 GitHub: https://github.com/mchave3/Crate"
+            Write-CenteredHost $creditLine2 -ForegroundColor DarkCyan
 
-            Write-Host "  📄 License: " -ForegroundColor $creditColor -NoNewline
-            Write-Host "MIT License" -ForegroundColor DarkGray
+            $creditLine3 = "📄 License: MIT License"
+            Write-CenteredHost $creditLine3 -ForegroundColor DarkGray
 
             Write-Host ""
         }
         catch {
-            Write-Host "  📦 Crate | Version: Unknown | Created by Mickaël CHAVE" -ForegroundColor DarkGray
+            Write-CenteredHost "📦 Crate | Version: Unknown | Created by Mickaël CHAVE" -ForegroundColor $creditColor
             Write-Host ""
         }
     }

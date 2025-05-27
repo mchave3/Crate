@@ -26,14 +26,14 @@ function Show-CrateLogo {
         $nameColor = "White"
 
         Write-Host ""
-        Write-Host "        ███████╗██████╗  █████╗ ████████╗███████╗" -ForegroundColor $nameColor
-        Write-Host "        ██╔════╝██╔══██╗██╔══██╗╚══██╔══╝██╔════╝" -ForegroundColor $nameColor
-        Write-Host "        ██║     ██████╔╝███████║   ██║   █████╗  " -ForegroundColor $nameColor
-        Write-Host "        ██║     ██╔══██╗██╔══██║   ██║   ██╔══╝  " -ForegroundColor $nameColor
-        Write-Host "        ╚██████╗██║  ██║██║  ██║   ██║   ███████╗" -ForegroundColor $nameColor
-        Write-Host "         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝" -ForegroundColor $nameColor
+        Write-CenteredHost "███████╗██████╗  █████╗ ████████╗███████╗" -ForegroundColor $nameColor
+        Write-CenteredHost "██╔════╝██╔══██╗██╔══██╗╚══██╔══╝██╔════╝" -ForegroundColor $nameColor
+        Write-CenteredHost "██║     ██████╔╝███████║   ██║   █████╗  " -ForegroundColor $nameColor
+        Write-CenteredHost "██║     ██╔══██╗██╔══██║   ██║   ██╔══╝  " -ForegroundColor $nameColor
+        Write-CenteredHost "╚██████╗██║  ██║██║  ██║   ██║   ███████╗" -ForegroundColor $nameColor
+        Write-CenteredHost " ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝" -ForegroundColor $nameColor
         Write-Host ""
-        Write-Host "              Windows ISO Provisioning Tool" -ForegroundColor DarkGray
+        Write-CenteredHost "Windows ISO Provisioning Tool" -ForegroundColor DarkGray
         Write-Host ""
     }
 }

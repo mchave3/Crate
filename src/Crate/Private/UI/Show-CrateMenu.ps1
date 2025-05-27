@@ -49,15 +49,22 @@ function Show-CrateMenu {
             Clear-Host
 
             # ===== PARTIE 1: LOGO + NOM DU MODULE EN ASCII ART =====
-            Show-CrateLogo
-
-            # ===== PARTIE 2: MENU =====
+            Show-CrateLogo            # ===== PARTIE 2: MENU =====
             Write-Host ""
-            Write-Host "🚀 $Title" -ForegroundColor White -BackgroundColor DarkBlue
-            Write-Host ("─" * ($Title.Length + 4)) -ForegroundColor DarkGray
+            Write-CenteredHost "🚀 $Title" -ForegroundColor White -BackgroundColor DarkBlue
+            Write-CenteredHost ("─" * ($Title.Length + 4)) -ForegroundColor DarkGray
             Write-Host ""
 
-            # Display options
+            # Display options - Calculate centering for menu items
+            try {
+                $consoleWidth = $Host.UI.RawUI.WindowSize.Width
+                $maxOptionLength = ($Options | Measure-Object -Property Length -Maximum).Maximum + 4 # +4 for prefix
+                $menuLeftPadding = [Math]::Max(0, [Math]::Floor(($consoleWidth - $maxOptionLength) / 2))
+            }
+            catch {
+                $menuLeftPadding = 0
+            }
+
             for ($i = 0; $i -lt $Options.Length; $i++) {
                 $prefix = "  "
                 $color = "White"
@@ -74,13 +81,16 @@ function Show-CrateMenu {
                     $prefix += "☐ "
                 }
 
-                Write-Host "$prefix$($Options[$i])" -ForegroundColor $color
-            }            Write-Host ""
+                $menuLine = (" " * $menuLeftPadding) + "$prefix$($Options[$i])"
+                Write-Host $menuLine -ForegroundColor $color
+            }
+
+            Write-Host ""
             if ($AllowMultipleSelection) {
-                Write-Host "Navigation: ↑/↓ arrows, Space to select/deselect, Enter to confirm, Q to quit" -ForegroundColor DarkGray
+                Write-CenteredHost "Navigation: ↑/↓ arrows, Space to select/deselect, Enter to confirm, Q to quit" -ForegroundColor DarkGray
             }
             else {
-                Write-Host "Navigation: ↑/↓ arrows, Enter to select, Q to quit" -ForegroundColor DarkGray
+                Write-CenteredHost "Navigation: ↑/↓ arrows, Enter to select, Q to quit" -ForegroundColor DarkGray
             }
 
             # ===== PARTIE 3: CREDIT + VERSION DU MODULE =====
