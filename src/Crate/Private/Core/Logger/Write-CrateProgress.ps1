@@ -38,7 +38,7 @@ function Write-CrateProgress {
             $Script:CrateLogger.Progress($Message)
         }
         else {
-            Write-CrateLog -Data "⏳ $Message" -Level "Info"
+            Write-CrateLog -Data "$Message" -Level "Info"
         }
     }
 }

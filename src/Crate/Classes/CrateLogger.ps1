@@ -77,13 +77,14 @@ class CrateLogger {
     # Write a log entry to file, console, and buffer with UI-only support
     [void]Write([string]$message, [string]$level = "INFO", [bool]$forceDisplay = $false, [bool]$noFileLog = $false) {
         $caller = $this.GetCallerName()
-        $timestamp = Get-Date -Format "G"
-        $logEntry = "[$timestamp] [$level] [$caller] $message"
+
+        # Create unified format for both file and console
+        $formattedEntry = $this.FormatLogEntry("", $level, $caller, $message)
 
         # Write to log file unless it's a UI-only message
         if (!$noFileLog) {
             try {
-                Add-Content -Path $this.LogPath -Value $logEntry -Encoding UTF8
+                Add-Content -Path $this.LogPath -Value $formattedEntry -Encoding UTF8
             }
             catch {
                 # Fail silently for file logging issues to avoid breaking the application
@@ -95,7 +96,7 @@ class CrateLogger {
         # UI levels (PROMPT, HEADER, SEPARATOR) are always displayed unless in silent mode
         $isUILevel = $level -in @("PROMPT", "HEADER", "SEPARATOR")
         if (!$this.SilentMode -or $forceDisplay -or $level -in @("ERROR", "WARNING", "FATAL") -or $isUILevel) {
-            $this.WriteToConsole($message, $level)
+            $this.WriteToConsole("", $level, $caller, $message)
         }
 
         # Add to in-memory buffer for UI access (skip UI-only messages from buffer)
@@ -132,22 +133,8 @@ class CrateLogger {
         }
     }
 
-    # Write a formatted message to the console with emojis and colors
-    [void]WriteToConsole([string]$message, [string]$level) {
-        # Define emoji for each log level
-        $emoji = switch ($level) {
-            "ERROR" { "❌" }
-            "WARNING" { "⚠️" }
-            "SUCCESS" { "✅" }
-            "DEBUG" { "🐛" }
-            "VERBOSE" { "🔍" }
-            "FATAL" { "💥" }
-            "PROMPT" { "❓" }
-            "HEADER" { "🚀" }
-            "SEPARATOR" { "" }
-            default { "ℹ️" }
-        }
-
+    # Write a formatted message to the console with structured 4-column layout
+    [void]WriteToConsole([string]$timestamp, [string]$level, [string]$caller, [string]$message) {
         # Define color for each log level
         $color = switch ($level) {
             "ERROR" { "Red" }
@@ -162,36 +149,60 @@ class CrateLogger {
             default { "White" }
         }
 
-        # Special handling for UI-specific levels
+        # Special handling for UI-specific levels (keep emojis for menus/UI)
         if ($level -eq "HEADER") {
             Write-Host ""
-            Write-Host "$emoji $message" -ForegroundColor $color -BackgroundColor DarkBlue
+            Write-Host "🚀 $message" -ForegroundColor $color -BackgroundColor DarkBlue
             Write-Host ""
         }
         elseif ($level -eq "SEPARATOR") {
             # For separator, ignore the message and always show a line
-            Write-Host ("─" * 60) -ForegroundColor $color
+            Write-Host ("─" * 80) -ForegroundColor $color
+        }
+        elseif ($level -eq "PROMPT") {
+            # For prompts, use emoji but also show in structured format
+            Write-Host "❓ $message" -ForegroundColor $color
         }
         else {
-            Write-Host "$emoji $message" -ForegroundColor $color
+            # Use unified format for console output (ignore passed timestamp, generate new one)
+            $formattedEntry = $this.FormatLogEntry("", $level, $caller, $message)
+            Write-Host $formattedEntry -ForegroundColor $color
         }
+    }
+
+    # Format log entry with unified professional structure (Format 3: Brackets)
+    [string]FormatLogEntry([string]$ignored, [string]$level, [string]$caller, [string]$message) {
+        # Generate timestamp in correct format
+        $timestamp = Get-Date -Format G
+
+        # Clean up caller name for better readability
+        $cleanCaller = if ($caller -eq "Unknown" -or $caller -eq "<ScriptBlock>") {
+            "System"
+        }
+        else {
+            $caller -replace "^(.*)<.*>$", '$1'  # Remove <Process> part if exists
+        }
+
+        # Format: [timestamp] [level] [caller] message with aligned level
+        $alignedLevel = $level.PadRight(7)  # Align to longest level "WARNING" (7 chars)
+        return "[$timestamp] [$alignedLevel] [$cleanCaller] $message"
     }
 
     # Log the start of an operation
     [void]StartOperation([string]$operation) {
-        $this.Write("🚀 Starting: $operation", "INFO", $false, $false)
+        $this.Write("Starting: $operation", "INFO", $false, $false)
     }
 
     # Log the completion of an operation with success status
     [void]EndOperation([string]$operation, [bool]$success = $true) {
-        $emoji = if ($success) { "✅" } else { "❌" }
         $levelValue = if ($success) { "SUCCESS" } else { "ERROR" }
-        $this.Write("$emoji Completed: $operation", $levelValue, $false, $false)
+        $statusText = if ($success) { "Completed" } else { "Failed" }
+        $this.Write("${statusText}: $operation", $levelValue, $false, $false)
     }
 
     # Log a progress message for ongoing operations
     [void]Progress([string]$message) {
-        $this.Write("⏳ $message", "INFO", $false, $false)
+        $this.Write("$message", "INFO", $false, $false)
     }
 
     # Enable or disable silent mode for UI compatibility
