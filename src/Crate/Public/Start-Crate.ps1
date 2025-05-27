@@ -45,9 +45,7 @@ function Start-Crate {
 
         [Parameter()]
         [switch]$AutoMode
-    )    begin {
-        # Initialization will handle the banner, version display, and logging setup
-    }
+    )
 
     process {
         if ($PSCmdlet.ShouldProcess("Crate", "Start")) {

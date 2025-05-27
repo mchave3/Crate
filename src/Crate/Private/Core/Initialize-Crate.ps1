@@ -294,7 +294,7 @@ function Initialize-Crate {
             Write-Host ("═" * 80) -ForegroundColor Green
 
             # Countdown before showing menu
-            Write-CrateLog -Data "Starting Crate interface in:" -Level 'Success'
+            Write-CrateLog -Data "Starting Crate interface:" -Level 'Success'
             for ($i = 5; $i -gt 0; $i--) {
                 Write-Host "  $i seconds..." -ForegroundColor Yellow
                 Start-Sleep -Seconds 1

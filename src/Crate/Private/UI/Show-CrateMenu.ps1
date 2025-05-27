@@ -47,7 +47,11 @@ function Show-CrateMenu {
 
         do {
             Clear-Host
-            # Display header
+
+            # ===== PARTIE 1: LOGO + NOM DU MODULE EN ASCII ART =====
+            Show-CrateLogo
+
+            # ===== PARTIE 2: MENU =====
             Write-Host ""
             Write-Host "🚀 $Title" -ForegroundColor White -BackgroundColor DarkBlue
             Write-Host ("─" * ($Title.Length + 4)) -ForegroundColor DarkGray
@@ -71,15 +75,18 @@ function Show-CrateMenu {
                 }
 
                 Write-Host "$prefix$($Options[$i])" -ForegroundColor $color
-            }
-
-            Write-Host ""
+            }            Write-Host ""
             if ($AllowMultipleSelection) {
                 Write-Host "Navigation: ↑/↓ arrows, Space to select/deselect, Enter to confirm, Q to quit" -ForegroundColor DarkGray
             }
             else {
                 Write-Host "Navigation: ↑/↓ arrows, Enter to select, Q to quit" -ForegroundColor DarkGray
-            }            # Get user input
+            }
+
+            # ===== PARTIE 3: CREDIT + VERSION DU MODULE =====
+            Show-CrateFooter
+
+            # Get user input
             $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
             switch ($key.VirtualKeyCode) {
