@@ -202,11 +202,31 @@ function Initialize-Crate {
             }
             catch {
                 Write-CrateLog -Data "Warning: DISM not found in PATH" -Level 'Warning'
-            }
-            Write-Host ("─" * 80) -ForegroundColor DarkBlue
+            }            Write-Host ("─" * 80) -ForegroundColor DarkBlue
             #endregion
 
-            #region Workspace Structure Creation (Priority 6)
+            #region Console Size Optimization (Priority 6)
+            Write-Host ("═" * 80) -ForegroundColor DarkMagenta
+            Write-Host "🖥️ CONSOLE SIZE OPTIMIZATION" -ForegroundColor Magenta
+            Write-Host ("─" * 80) -ForegroundColor DarkMagenta
+            Write-CrateProgress -Message "Optimizing console size for Crate interface"
+
+            try {
+                # Set optimal console size for Crate menu display
+                Set-CrateConsoleSize -Width 800 -Height 600 -SaveOriginal -Verbose:$false
+
+                # Get the actual console size after resizing
+                $actualSize = $Host.UI.RawUI.WindowSize
+                Write-CrateLog -Data "✓ Console size optimized for Crate interface ($($actualSize.Width)x$($actualSize.Height))" -Level 'Success'
+            }
+            catch {
+                Write-CrateLog -Data "Warning: Could not optimize console size: $($_.Exception.Message)" -Level 'Warning'
+                Write-CrateLog -Data "Crate will continue with current console size" -Level 'Info'
+            }
+            Write-Host ("─" * 80) -ForegroundColor DarkMagenta
+            #endregion
+
+            #region Workspace Structure Creation (Priority 7)
             Write-Host ("═" * 80) -ForegroundColor DarkGreen
             Write-Host "📁 WORKSPACE STRUCTURE CREATION" -ForegroundColor Green
             Write-Host ("─" * 80) -ForegroundColor DarkGreen
@@ -242,7 +262,7 @@ function Initialize-Crate {
             Write-Host ("─" * 80) -ForegroundColor DarkGreen
             #endregion
 
-            #region Configuration Management (Priority 7)
+            #region Configuration Management (Priority 8)
             Write-Host ("═" * 80) -ForegroundColor DarkCyan
             Write-Host "⚙️ CONFIGURATION MANAGEMENT" -ForegroundColor Cyan
             Write-Host ("─" * 80) -ForegroundColor DarkCyan
@@ -271,7 +291,7 @@ function Initialize-Crate {
             Write-Host ("─" * 80) -ForegroundColor DarkCyan
             #endregion
 
-            #region Global Variables and Final Setup (Priority 8)
+            #region Global Variables and Final Setup (Priority 9)
             Write-Host ("═" * 80) -ForegroundColor DarkMagenta
             Write-Host "🏁 GLOBAL VARIABLES & FINAL SETUP" -ForegroundColor Magenta
             Write-Host ("─" * 80) -ForegroundColor DarkMagenta
