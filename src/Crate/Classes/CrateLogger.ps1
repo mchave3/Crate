@@ -186,9 +186,7 @@ class CrateLogger {
         # Format: [timestamp] [level] [caller] message with aligned level
         $alignedLevel = $level.PadRight(7)  # Align to longest level "WARNING" (7 chars)
         return "[$timestamp] [$alignedLevel] [$cleanCaller] $message"
-    }
-
-    # Log the start of an operation
+    }    # Log the start of an operation
     [void]StartOperation([string]$operation) {
         $this.Write("Starting: $operation", "INFO", $false, $false)
     }

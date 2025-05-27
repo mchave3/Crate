@@ -45,14 +45,8 @@ function Start-Crate {
 
         [Parameter()]
         [switch]$AutoMode
-    )
-
-    begin {
-        # Clear screen and show welcome banner
-        Clear-Host
-        Write-CrateLog -Data "Crate - Windows ISO Provisioning Tool v25.5.26.1" -Level "Header" -NoFileLog
-        Write-CrateLog -Data "Modern CLI interface for ISO mounting, provisioning, and dismounting" -Level "Info" -NoFileLog
-        Write-Host ("─" * 60) -ForegroundColor DarkGray
+    )    begin {
+        # Initialization will handle the banner, version display, and logging setup
     }
 
     process {

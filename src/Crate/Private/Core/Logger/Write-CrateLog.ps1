@@ -56,9 +56,7 @@ function Write-CrateLog {
 
         [Parameter()]
         [switch]$NoFileLog
-    )
-
-    process {
+    )    process {
         # Normalize level to uppercase for internal consistency
         $normalizedLevel = $Level.ToUpper()
 
@@ -67,10 +65,10 @@ function Write-CrateLog {
             try {
                 Write-Debug "CrateWorkspace value: '$Script:CrateWorkspace'"
                 $logPath = if ($Script:CrateWorkspace) {
-                    Join-Path $Script:CrateWorkspace "Logs\Crate_$(Get-Date -Format 'yyyyMMdd').log"
+                    Join-Path $Script:CrateWorkspace "Logs\Crate_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
                 }
                 else {
-                    "$env:TEMP\Crate_$(Get-Date -Format 'yyyyMMdd').log"
+                    "$env:TEMP\Crate_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
                 }
 
                 Write-Debug "Creating CrateLogger with path: $logPath"

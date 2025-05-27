@@ -56,5 +56,5 @@ foreach ($file in @($private + $public)) {
 Export-ModuleMember -Function $public.Basename
 
 # For development/testing purposes, also export some private functions
-$privateToExport = @('Write-CrateLog', 'Initialize-Crate', 'Start-CrateOperation', 'Complete-CrateOperation', 'Write-CrateProgress')
+$privateToExport = @('Write-CrateLog', 'Initialize-Crate', 'Start-CrateOperation', 'Complete-CrateOperation', 'Write-CrateProgress', 'Get-CrateVersion', 'Test-CrateModuleUpdate')
 Export-ModuleMember -Function $privateToExport

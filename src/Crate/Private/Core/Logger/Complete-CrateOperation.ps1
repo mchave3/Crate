@@ -6,6 +6,7 @@
     Marks an operation as completed in the Crate logging system.
     This function allows for structured operation tracking with
     automatic logging of the operation completion status.
+    Uses the dedicated EndOperation method of CrateLogger for consistency.
 
 .NOTES
     Name:        Complete-CrateOperation.ps1
@@ -37,17 +38,15 @@ function Complete-CrateOperation {
 
         [Parameter()]
         [bool]$Success = $true
-    )
-
-    process {
+    )    process {
         if ($Script:CrateLogger) {
-            # Only log to the logger without console output to avoid duplication with specific success messages
-            $levelValue = if ($Success) { "SUCCESS" } else { "ERROR" }
-            $Script:CrateLogger.Write("Operation completed: $Operation", $levelValue, $false, $true)
+            # Use the dedicated EndOperation method for consistency
+            $Script:CrateLogger.EndOperation($Operation, $Success)
         }
         else {
             $level = if ($Success) { "Success" } else { "Error" }
-            Write-CrateLog -Data "Completed: $Operation" -Level $level
+            $statusText = if ($Success) { "Completed" } else { "Failed" }
+            Write-CrateLog -Data "${statusText}: $Operation" -Level $level
         }
     }
 }

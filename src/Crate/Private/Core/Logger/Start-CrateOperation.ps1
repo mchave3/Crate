@@ -31,14 +31,14 @@ function Start-CrateOperation {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Operation
-    )
-
-    process {
+    )    process {
         if ($PSCmdlet.ShouldProcess($Operation, "Start operation")) {
             if ($Script:CrateLogger) {
+                # Use the dedicated StartOperation method for consistency
                 $Script:CrateLogger.StartOperation($Operation)
             }
             else {
+                # Fallback to Write-CrateLog if logger not initialized
                 Write-CrateLog -Data "Starting: $Operation" -Level "Info"
             }
         }
