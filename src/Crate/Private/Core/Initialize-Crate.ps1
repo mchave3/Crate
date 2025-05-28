@@ -45,42 +45,30 @@ function Initialize-Crate {
 
     begin {
         #region Logger Initialization (Priority 1)
-        Write-Host ("═" * 80) -ForegroundColor DarkCyan
-        Write-Host "🔧 LOGGER INITIALIZATION" -ForegroundColor Cyan
-        Write-Host ("─" * 80) -ForegroundColor DarkCyan
-
         # Initialize logger first to capture all subsequent initialization logs
-        Write-Host "Initializing Crate Logger..." -ForegroundColor Cyan
 
         # Ensure logs directory exists before creating logger
         $logsPath = Join-Path $WorkspacePath 'Logs'
         if (-not (Test-Path $logsPath)) {
             try {
                 New-Item -Path $logsPath -ItemType Directory -Force | Out-Null
-                Write-Host "✓ Created logs directory: $logsPath" -ForegroundColor Green
             }
             catch {
-                Write-Host "✗ Error creating logs directory: $($_.Exception.Message)" -ForegroundColor Red
-                throw
+                throw "Error creating logs directory: $($_.Exception.Message)"
             }
         }
 
-        # Initialize the logger with timestamp-based filename
-        $logFile = Join-Path $logsPath "Crate_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+        # Create logger instance
+        $logFile = Join-Path $logsPath "Crate.log"
         try {
             $Script:CrateLogger = [CrateLogger]::new($logFile)
-            Write-Host "✓ Logger initialized successfully" -ForegroundColor Green
         }
         catch {
-            Write-Host "✗ Error creating logger: $($_.Exception.Message)" -ForegroundColor Red
-            throw
+            throw "Error creating logger: $($_.Exception.Message)"
         }
-        Write-Host ("─" * 80) -ForegroundColor DarkCyan
-        #endregion        #region Welcome Banner and Version Information (Priority 2)
-        Write-Host ("═" * 80) -ForegroundColor DarkMagenta
-        Write-Host "🎨 WELCOME BANNER & VERSION INFORMATION" -ForegroundColor Magenta
-        Write-Host ("─" * 80) -ForegroundColor DarkMagenta
+        #endregion
 
+        #region Welcome Banner and Version Information (Priority 2)
         # Clear screen and show welcome banner
         Clear-Host
 
@@ -119,22 +107,23 @@ function Initialize-Crate {
             $currentVersion = "25.5.26.1"  # Fallback version
         }
 
-        # Display welcome banner
-        Write-CrateLog -Data "Crate - Windows ISO Provisioning Tool v$currentVersion" -Level "Header" -NoFileLog
-        Write-CrateLog -Data "Modern CLI interface for ISO mounting, provisioning, and dismounting" -Level "Info" -NoFileLog
-        Write-Host ("─" * 60) -ForegroundColor DarkGray        # Log the initialization start
-        Write-CrateLog -Data "Starting Crate initialization process" -Level 'Info'
-        Write-CrateLog -Data "Module version: $currentVersion" -Level 'Info'
-        Start-CrateOperation -Operation "Crate Environment Initialization"
-        Write-Host ("─" * 80) -ForegroundColor DarkMagenta
+        # Log the initialization start
+        Write-CrateLog -Data "====================================================" -Level 'Info'
+        Write-CrateLog -Data "    >>> STEP 1/8: INITIALIZATION START <<<" -Level 'Info'
+        Write-CrateLog -Data "====================================================" -Level 'Info'
+        Write-CrateLog -Data "Crate - Windows ISO Provisioning Tool v$currentVersion" -Level "Info"
+        Write-CrateLog -Data "Modern CLI interface for ISO mounting, provisioning, and dismounting" -Level "Info"
+        Write-CrateLog -Data "====================================================" -Level 'Info'
+        Start-CrateOperation -Operation "Starting Crate initialization process..."
         #endregion
 
         #region Version Update Check (Priority 3)
-        Write-Host ("═" * 80) -ForegroundColor DarkYellow
-        Write-Host "🔍 VERSION UPDATE CHECK" -ForegroundColor Yellow
-        Write-Host ("─" * 80) -ForegroundColor DarkYellow
+        Write-CrateLog -Data "====================================================" -Level 'Info'
+        Write-CrateLog -Data "    >>> STEP 2/8: VERSION UPDATE CHECK <<<" -Level 'Info'
+        Write-CrateLog -Data "====================================================" -Level 'Info'
+
         # Check for module updates on PowerShell Gallery
-        Write-CrateProgress -Message "Checking for module updates"
+        Write-CrateProgress -Message "Checking for module updates..."
         try {
             $galleryModule = Find-Module -Name 'Crate' -ErrorAction SilentlyContinue
             if ($galleryModule) {
@@ -156,31 +145,31 @@ function Initialize-Crate {
         catch {
             Write-CrateLog -Data "Could not check for updates: $($_.Exception.Message)" -Level 'Warning'
         }
-        Write-Host ("─" * 80) -ForegroundColor DarkYellow
         #endregion
-    }    process {
+    }
+
+    process {
         $Error.Clear()
 
         try {
-            #region Administrative Privileges Validation (Priority 4)
-            Write-Host ("═" * 80) -ForegroundColor DarkRed
-            Write-Host "🛡️ ADMINISTRATIVE PRIVILEGES VALIDATION" -ForegroundColor Red
-            Write-Host ("─" * 80) -ForegroundColor DarkRed
 
-            Write-CrateProgress -Message "Validating administrative privileges"
+            #region Administrative Privileges Validation (Priority 4)
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateLog -Data "    >>> STEP 3/8: ADMINISTRATIVE PRIVILEGES VALIDATION <<<" -Level 'Info'
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateProgress -Message "Validating administrative privileges..."
             $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
             if (-not $isAdmin) {
                 throw "Crate requires administrative privileges. Please run as administrator."
             }
-            Write-CrateLog -Data "✓ Administrative privileges verified" -Level 'Success'
-            Write-Host ("─" * 80) -ForegroundColor DarkRed
+            Write-CrateLog -Data "Administrative privileges verified" -Level 'Success'
             #endregion
 
             #region System Environment Validation (Priority 5)
-            Write-Host ("═" * 80) -ForegroundColor DarkBlue
-            Write-Host "🔧 SYSTEM ENVIRONMENT VALIDATION" -ForegroundColor Blue
-            Write-Host ("─" * 80) -ForegroundColor DarkBlue
-            Write-CrateProgress -Message "Validating system environment"
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateLog -Data "    >>> STEP 4/8: SYSTEM ENVIRONMENT VALIDATION <<<" -Level 'Info'
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateProgress -Message "Validating system environment..."
 
             # Check PowerShell version
             $psVersion = $PSVersionTable.PSVersion
@@ -198,39 +187,18 @@ function Initialize-Crate {
             # Check DISM availability
             try {
                 $dismPath = Get-Command 'dism.exe' -ErrorAction Stop
-                Write-CrateLog -Data "✓ DISM found at: $($dismPath.Source)" -Level 'Success'
+                Write-CrateLog -Data "DISM found at: $($dismPath.Source)" -Level 'Success'
             }
             catch {
                 Write-CrateLog -Data "Warning: DISM not found in PATH" -Level 'Warning'
-            }            Write-Host ("─" * 80) -ForegroundColor DarkBlue
+            }
             #endregion
 
-            #region Console Size Optimization (Priority 6)
-            Write-Host ("═" * 80) -ForegroundColor DarkMagenta
-            Write-Host "🖥️ CONSOLE SIZE OPTIMIZATION" -ForegroundColor Magenta
-            Write-Host ("─" * 80) -ForegroundColor DarkMagenta
-            Write-CrateProgress -Message "Optimizing console size for Crate interface"
-
-            try {
-                # Set optimal console size for Crate menu display
-                Set-CrateConsoleSize -Width 800 -Height 600 -SaveOriginal -Verbose:$false
-
-                # Get the actual console size after resizing
-                $actualSize = $Host.UI.RawUI.WindowSize
-                Write-CrateLog -Data "✓ Console size optimized for Crate interface ($($actualSize.Width)x$($actualSize.Height))" -Level 'Success'
-            }
-            catch {
-                Write-CrateLog -Data "Warning: Could not optimize console size: $($_.Exception.Message)" -Level 'Warning'
-                Write-CrateLog -Data "Crate will continue with current console size" -Level 'Info'
-            }
-            Write-Host ("─" * 80) -ForegroundColor DarkMagenta
-            #endregion
-
-            #region Workspace Structure Creation (Priority 7)
-            Write-Host ("═" * 80) -ForegroundColor DarkGreen
-            Write-Host "📁 WORKSPACE STRUCTURE CREATION" -ForegroundColor Green
-            Write-Host ("─" * 80) -ForegroundColor DarkGreen
-            Write-CrateProgress -Message "Creating workspace structure"
+            #region Workspace Structure Creation (Priority 6)
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateLog -Data "    >>> STEP 5/8: WORKSPACE STRUCTURE CREATION <<<" -Level 'Info'
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateProgress -Message "Creating workspace structure..."
             $workspaceStructure = @(
                 'Config',
                 'Config\profiles',
@@ -252,21 +220,21 @@ function Initialize-Crate {
                 $fullPath = Join-Path $WorkspacePath $folder
                 if (-not (Test-Path $fullPath)) {
                     New-Item -Path $fullPath -ItemType Directory -Force | Out-Null
-                    Write-CrateLog -Data "✓ Created workspace folder: $folder" -Level 'Info'
+                    Write-CrateLog -Data "Created workspace folder: $folder" -Level 'Info'
                     $createdFolders++
                 }
                 else {
                     $existingFolders++
                 }
-            }            Write-CrateLog -Data "Workspace structure: $createdFolders new folders, $existingFolders existing" -Level 'Info'
-            Write-Host ("─" * 80) -ForegroundColor DarkGreen
+            }
+            Write-CrateLog -Data "Workspace structure: $createdFolders new folders, $existingFolders existing" -Level 'Info'
             #endregion
 
-            #region Configuration Management (Priority 8)
-            Write-Host ("═" * 80) -ForegroundColor DarkCyan
-            Write-Host "⚙️ CONFIGURATION MANAGEMENT" -ForegroundColor Cyan
-            Write-Host ("─" * 80) -ForegroundColor DarkCyan
-            Write-CrateProgress -Message "Initializing configuration"
+            #region Configuration Management (Priority 7)
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateLog -Data "    >>> STEP 6/8: CONFIGURATION MANAGEMENT <<<" -Level 'Info'
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateProgress -Message "Initializing configuration..."
             $configPath = Join-Path $WorkspacePath 'Config\settings.json'
 
             if (-not (Test-Path $configPath) -or $Force) {
@@ -283,38 +251,36 @@ function Initialize-Crate {
                 } | ConvertTo-Json -Depth 3
 
                 $defaultConfig | Out-File -FilePath $configPath -Encoding UTF8
-                Write-CrateLog -Data "✓ Created default configuration" -Level 'Info'
+                Write-CrateLog -Data "Created default configuration" -Level 'Info'
             }
             else {
-                Write-CrateLog -Data "✓ Configuration file already exists" -Level 'Info'
+                Write-CrateLog -Data "Configuration file already exists" -Level 'Info'
             }
-            Write-Host ("─" * 80) -ForegroundColor DarkCyan
             #endregion
 
-            #region Global Variables and Final Setup (Priority 9)
-            Write-Host ("═" * 80) -ForegroundColor DarkMagenta
-            Write-Host "🏁 GLOBAL VARIABLES & FINAL SETUP" -ForegroundColor Magenta
-            Write-Host ("─" * 80) -ForegroundColor DarkMagenta
-            Write-CrateProgress -Message "Finalizing environment setup"            # Set global variables
+            #region Global Variables and Final Setup (Priority 8)
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateLog -Data "    >>> STEP 7/8: GLOBAL VARIABLES & FINAL SETUP <<<" -Level 'Info'
+            Write-CrateLog -Data "====================================================" -Level 'Info'
+            Write-CrateProgress -Message "Finalizing environment setup..."
+
+            # Set global variables
             $Script:CrateWorkspace = $WorkspacePath
             $Script:CrateInitialized = $true
             $Script:CrateVersion = $currentVersion
 
-            Write-CrateLog -Data "✓ Global variables configured" -Level 'Success'
+            Write-CrateLog -Data "Global variables configured" -Level 'Success'
             Write-CrateLog -Data "Workspace: $WorkspacePath" -Level 'Info'
-            Write-CrateLog -Data "Initialization completed successfully" -Level 'Success'
-            Write-Host ("─" * 80) -ForegroundColor DarkMagenta
+            Write-CrateProgress -Message "Completing initialization..."
+            Write-CrateLog -Data "====================================================" -Level 'Success'
+            Write-CrateLog -Data "    >>> STEP 8/8: INITIALIZATION COMPLETED SUCCESSFULLY <<<" -Level 'Success'
+            Write-CrateLog -Data "====================================================" -Level 'Success'
             #endregion
 
             Complete-CrateOperation -Operation "Crate Environment Initialization" -Success $true
 
-            # Final success banner
-            Write-Host ("═" * 80) -ForegroundColor Green
-            Write-Host "🎉 INITIALIZATION COMPLETED SUCCESSFULLY" -ForegroundColor Green
-            Write-Host ("═" * 80) -ForegroundColor Green
-
-            # Countdown before showing menu
-            Write-CrateLog -Data "Starting Crate interface:" -Level 'Success'
+            # Final success message
+            Write-CrateLog -Data "Starting Crate interface..." -Level 'Success'
             for ($i = 5; $i -gt 0; $i--) {
                 Write-Host "  $i seconds..." -ForegroundColor Yellow
                 Start-Sleep -Seconds 1
@@ -324,7 +290,7 @@ function Initialize-Crate {
         }
         catch {
             Complete-CrateOperation -Operation "Crate Environment Initialization" -Success $false
-            Write-CrateLog -Data "✗ Initialization failed: $($_.Exception.Message)" -Level 'Error'
+            Write-CrateLog -Data "Initialization failed: $($_.Exception.Message)" -Level 'Error'
             return $false
         }
     }

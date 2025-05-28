@@ -74,6 +74,24 @@ class CrateLogger {
         }
     }
 
+    # Convert log level to 3-character code for compact display
+    [string]GetLevelCode([string]$level) {
+        $levelCodes = @{
+            "ERROR"     = "ERR"
+            "WARNING"   = "WAR"
+            "INFO"      = "INF"
+            "DEBUG"     = "DEB"
+            "VERBOSE"   = "VER"
+            "FATAL"     = "FAT"
+            "SUCCESS"   = "SUC"
+            "PROMPT"    = "PRM"
+            "HEADER"    = "HDR"
+            "SEPARATOR" = "SEP"
+        }
+
+        return $levelCodes[$level] ?? $level.Substring(0, [Math]::Min(3, $level.Length)).ToUpper()
+    }
+
     # Write a log entry to file, console, and buffer with UI-only support
     [void]Write([string]$message, [string]$level = "INFO", [bool]$forceDisplay = $false, [bool]$noFileLog = $false) {
         $caller = $this.GetCallerName()
@@ -183,10 +201,14 @@ class CrateLogger {
             $caller -replace "^(.*)<.*>$", '$1'  # Remove <Process> part if exists
         }
 
-        # Format: [timestamp] [level] [caller] message with aligned level
-        $alignedLevel = $level.PadRight(7)  # Align to longest level "WARNING" (7 chars)
-        return "[$timestamp] [$alignedLevel] [$cleanCaller] $message"
-    }    # Log the start of an operation
+        # Get 3-character level code instead of padding full level name
+        $levelCode = $this.GetLevelCode($level)
+
+        # Format: [timestamp] [level] [caller] message with 3-char level code
+        return "[$timestamp] [$levelCode] [$cleanCaller] $message"
+    }
+
+    # Log the start of an operation
     [void]StartOperation([string]$operation) {
         $this.Write("Starting: $operation", "INFO", $false, $false)
     }

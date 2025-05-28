@@ -12,4 +12,4 @@ Windows ISO Provisioning Tool - Modern CLI interface for mounting, provisioning,
 
 ## Crate Cmdlets
 ### [Start-Crate](Start-Crate.md)
-Main entry point for the Crate Windows ISO provisioning tool.
+Starts the Crate provisioning tool in a new PowerShell window.

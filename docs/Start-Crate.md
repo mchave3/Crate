@@ -9,21 +9,20 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Main entry point for the Crate Windows ISO provisioning tool.
+Starts the Crate provisioning tool in a new PowerShell window.
 
 ## SYNTAX
 
 ```powershell
-Start-Crate [[-ConfigProfile] <String>] [-AutoMode] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+Start-Crate [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-Starts the Crate interactive CLI interface for mounting, provisioning, and dismounting
-Windows ISO images with updates and language packs.
-Provides a modern, intuitive
-terminal-based experience for Windows system administrators.
+This script launches the Crate provisioning tool in a new PowerShell window with
+a specified console mode for better visibility.
+It imports the Crate module and
+starts the interactive CLI interface.
 
 ## EXAMPLES
 
@@ -31,56 +30,9 @@ terminal-based experience for Windows system administrators.
 
 ```powershell
 Start-Crate
-Starts Crate with the interactive main menu.
-```
-
-### EXAMPLE 2
-
-```powershell
-Start-Crate -WorkspacePath "D:\CrateWorkspace"
-Starts Crate with a custom workspace location.
-```
-
-### EXAMPLE 3
-
-```powershell
-Start-Crate -ConfigProfile "Windows11Updates" -AutoMode
-Runs Crate in automated mode using the specified profile.
 ```
 
 ## PARAMETERS
-
-### -ConfigProfile
-
-Name of the configuration profile to use.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -AutoMode
-
-Run in automated mode using the specified profile without interactive menus.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
 
 ### -WhatIf
 
@@ -129,7 +81,7 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 Name:        Start-Crate.ps1
 Author:      Mickaël CHAVE
 Created:     26/05/2025
-Version:     25.5.26.1
+Version:     25.5.28.1
 Repository:  https://github.com/mchave3/Crate
 License:     MIT License
 
