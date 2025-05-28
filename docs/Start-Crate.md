@@ -23,6 +23,10 @@ This script launches the Crate provisioning tool in a new PowerShell window with
 a specified console mode for better visibility.
 It imports the Crate module and
 starts the interactive CLI interface.
+The function performs several validation checks:
+- Administrator privileges verification
+- PowerShell version compatibility (7+)
+- Console size optimization (100x50)
 
 ## EXAMPLES
 
@@ -30,6 +34,7 @@ starts the interactive CLI interface.
 
 ```powershell
 Start-Crate
+Starts the Crate provisioning tool with automatic environment optimization.
 ```
 
 ## PARAMETERS
