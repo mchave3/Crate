@@ -34,15 +34,39 @@ function Show-CrateMenu {
         [string]$Title,
 
         [Parameter(Mandatory = $true)]
-        [string[]]$Options,
-
-        [Parameter()]
+        [string[]]$Options,        [Parameter()]
         [switch]$AllowMultipleSelection
     )
 
     process {
         $selectedIndex = 0
         $selectedItems = @()
+
+        # Helper function to find next valid (non-separator) option
+        function Get-NextValidIndex($currentIndex, $options, $direction = 1) {
+            $nextIndex = $currentIndex
+            do {
+                if ($direction -eq 1) {
+                    # Moving down
+                    $nextIndex = if ($nextIndex -lt ($options.Length - 1)) { $nextIndex + 1 } else { 0 }
+                }
+                else {
+                    # Moving up
+                    $nextIndex = if ($nextIndex -gt 0) { $nextIndex - 1 } else { $options.Length - 1 }
+                }
+
+                # Prevent infinite loop if all options are separators
+                if ($nextIndex -eq $currentIndex) { break }
+
+            } while ($options[$nextIndex] -eq "---")
+
+            return $nextIndex
+        }
+
+        # Initialize to first valid option
+        while ($selectedIndex -lt $Options.Length -and $Options[$selectedIndex] -eq "---") {
+            $selectedIndex++
+        }
 
         do {
             Clear-Host
@@ -64,12 +88,16 @@ function Show-CrateMenu {
             }
             catch {
                 $menuLeftPadding = 0
-            }
-
-            # Render each menu option with appropriate styling and selection state
+            }            # Render each menu option with appropriate styling and selection state
             for ($i = 0; $i -lt $Options.Length; $i++) {
                 $prefix = "  "
                 $color = "White"
+
+                # Handle separators - display a visual separator line
+                if ($Options[$i] -eq "---") {
+                    Write-Host (" " * $menuLeftPadding) + ("─" * 40) -ForegroundColor DarkGray
+                    continue
+                }
 
                 # Highlight the currently selected option
                 if ($i -eq $selectedIndex) {
@@ -100,23 +128,20 @@ function Show-CrateMenu {
             }
 
             # Display module footer with version and credits
-            Show-CrateFooter
-
-            # Process keyboard input for menu navigation
+            Show-CrateFooter            # Process keyboard input for menu navigation
             $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 
             switch ($key.VirtualKeyCode) {
                 38 {
-                    # Up arrow - move to previous option
-                    $selectedIndex = if ($selectedIndex -gt 0) { $selectedIndex - 1 } else { $Options.Length - 1 }
+                    # Up arrow - move to previous valid option
+                    $selectedIndex = Get-NextValidIndex $selectedIndex $Options -1
                 }
                 40 {
-                    # Down arrow - move to next option
-                    $selectedIndex = if ($selectedIndex -lt ($Options.Length - 1)) { $selectedIndex + 1 } else { 0 }
-                }
-                32 {
-                    # Space bar - toggle selection in multiple selection mode
-                    if ($AllowMultipleSelection) {
+                    # Down arrow - move to next valid option
+                    $selectedIndex = Get-NextValidIndex $selectedIndex $Options 1
+                }                32 {
+                    # Space bar - toggle selection in multiple selection mode (only for valid options)
+                    if ($AllowMultipleSelection -and $Options[$selectedIndex] -ne "---") {
                         if ($selectedItems -contains $selectedIndex) {
                             $selectedItems = $selectedItems | Where-Object { $_ -ne $selectedIndex }
                         }
@@ -126,12 +151,14 @@ function Show-CrateMenu {
                     }
                 }
                 13 {
-                    # Enter - confirm selection and return result
-                    if ($AllowMultipleSelection) {
-                        return $selectedItems | ForEach-Object { $Options[$_] }
-                    }
-                    else {
-                        return $Options[$selectedIndex]
+                    # Enter - confirm selection and return result (only for valid options)
+                    if ($Options[$selectedIndex] -ne "---") {
+                        if ($AllowMultipleSelection) {
+                            return $selectedItems | ForEach-Object { $Options[$_] }
+                        }
+                        else {
+                            return $Options[$selectedIndex]
+                        }
                     }
                 }
                 81 {

@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Main entry point for the Crate Windows ISO provisioning tool.
+    Main entry point for the Crate modern CLI interface.
 
 .DESCRIPTION
     Starts the Crate interactive CLI interface for mounting, provisioning, and dismounting
@@ -34,71 +34,62 @@ function Start-CrateCLI {
                 # Initialize Crate environment
                 if (-not (Initialize-Crate -WorkspacePath "$env:ProgramData\Crate")) {
                     throw "Failed to initialize Crate environment"
-                }
-
-                # Show main interactive menu
+                }                # Show main interactive menu
                 do {
                     $mainMenuOptions = @(
-                        "📀 Mount Windows ISO",
-                        "🔄 Provision Updates",
-                        "🌐 Add Language Packs",
-                        "💿 Create Provisioned ISO",
-                        "📊 View Current Status",
-                        "⚙️ Configuration",
-                        "📋 View Logs",
+                        "📀 Start WIM Provisioning Workflow",
+                        "---",
+                        "📊 View Available WIM Masters",
+                        "📦 Manage Update Cache",
                         "🧹 Cleanup Workspace",
+                        "---",
+                        "📋 View Logs",
+                        "⚙️ Configuration",
+                        "---",
                         "❌ Exit"
                     )
 
-                    $selection = Show-CrateMenu -Title "Crate Main Menu" -Options $mainMenuOptions
+                    $selection = Show-CrateMenu -Title "Crate WIM Provisioning Tool" -Options $mainMenuOptions
 
                     if ($null -eq $selection) {
                         break
                     }
+
                     switch ($selection) {
-                        "📀 Mount Windows ISO" {
-                            Start-CrateOperation -Operation "ISO Mount Process"
-                            Write-CrateProgress -Message "Starting ISO mount process"
-                            # TODO: Implement ISO mounting workflow
-                            Write-CrateLog -Data "ISO mounting not yet implemented" -Level "Warning"
-                            Complete-CrateOperation -Operation "ISO Mount Process" -Success $false
+                        "📀 Start WIM Provisioning Workflow" {
+                            Start-CrateOperation -Operation "WIM Provisioning Workflow"
+                            Write-CrateProgress -Message "Starting complete WIM provisioning workflow"
+                            # TODO: Implement main WIM provisioning workflow
+                            # This will include: WIM discovery → Selection → Update download → Provisioning
+                            Write-CrateLog -Data "WIM provisioning workflow not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "WIM Provisioning Workflow" -Success $false
                             Read-Host "Press Enter to continue"
                         }
-                        "🔄 Provision Updates" {
-                            Start-CrateOperation -Operation "Update Provisioning"
-                            Write-CrateProgress -Message "Starting update provisioning"
-                            # TODO: Implement update provisioning workflow
-                            Write-CrateLog -Data "Update provisioning not yet implemented" -Level "Warning"
-                            Complete-CrateOperation -Operation "Update Provisioning" -Success $false
+                        "📊 View Available WIM Masters" {
+                            Start-CrateOperation -Operation "WIM Masters Discovery"
+                            Write-CrateProgress -Message "Scanning for available WIM master files"
+                            # TODO: Implement WIM masters discovery and listing
+                            Write-CrateLog -Data "WIM masters discovery not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "WIM Masters Discovery" -Success $false
                             Read-Host "Press Enter to continue"
                         }
-                        "🌐 Add Language Packs" {
-                            Start-CrateOperation -Operation "Language Pack Installation"
-                            Write-CrateProgress -Message "Starting language pack installation"
-                            # TODO: Implement language pack workflow
-                            Write-CrateLog -Data "Language pack installation not yet implemented" -Level "Warning"
-                            Complete-CrateOperation -Operation "Language Pack Installation" -Success $false
+                        "📦 Manage Update Cache" {
+                            Start-CrateOperation -Operation "Update Cache Management"
+                            Write-CrateProgress -Message "Managing update cache"
+                            # TODO: Implement update cache management (view, clean, download)
+                            Write-CrateLog -Data "Update cache management not yet implemented" -Level "Warning"
+                            Complete-CrateOperation -Operation "Update Cache Management" -Success $false
                             Read-Host "Press Enter to continue"
                         }
-                        "💿 Create Provisioned ISO" {
-                            Start-CrateOperation -Operation "ISO Creation"
-                            Write-CrateProgress -Message "Creating provisioned ISO"
-                            # TODO: Implement ISO creation workflow
-                            Write-CrateLog -Data "ISO creation not yet implemented" -Level "Warning"
-                            Complete-CrateOperation -Operation "ISO Creation" -Success $false
-                            Read-Host "Press Enter to continue"
-                        }
-                        "📊 View Current Status" {
-                            Write-CrateLog -Data "Current Crate Status:" -Level "Info"
-                            Write-CrateLog -Data "Workspace: $Script:CrateWorkspace" -Level 'Info'
-                            Write-CrateLog -Data "Initialized: $Script:CrateInitialized" -Level 'Info'
-                            # TODO: Show detailed status
-                            Read-Host "Press Enter to continue"
-                        }
-                        "⚙️ Configuration" {
-                            Write-CrateProgress -Message "Opening configuration management"
-                            # TODO: Implement configuration menu
-                            Write-CrateLog -Data "Configuration management not yet implemented" -Level "Warning"
+                        "🧹 Cleanup Workspace" {
+                            Write-CrateLog -Data "This will clean temporary files. Continue? (y/N)" -Level "Prompt" -NoFileLog
+                            $confirm = Read-Host
+                            if ($confirm -eq 'y' -or $confirm -eq 'Y') {
+                                Start-CrateOperation -Operation "Workspace Cleanup"
+                                # TODO: Implement workspace cleanup
+                                Write-CrateLog -Data "Workspace cleaned successfully" -Level "Success"
+                                Complete-CrateOperation -Operation "Workspace Cleanup" -Success $true
+                            }
                             Read-Host "Press Enter to continue"
                         }
                         "📋 View Logs" {
@@ -107,15 +98,10 @@ function Start-CrateCLI {
                                 Start-Process -FilePath "explorer.exe" -ArgumentList $logPath
                             }
                         }
-                        "🧹 Cleanup Workspace" {
-                            Write-CrateLog -Data "This will clean temporary files. Continue? (y/N)" -Level "Prompt" -NoFileLog
-                            $confirm = Read-Host
-                            if ($confirm -eq 'y' -or $confirm -eq 'Y') {
-                                Start-CrateOperation -Operation "Workspace Cleanup"
-                                # TODO: Implement cleanup
-                                Write-CrateLog -Data "Workspace cleaned successfully" -Level "Success"
-                                Complete-CrateOperation -Operation "Workspace Cleanup" -Success $true
-                            }
+                        "⚙️ Configuration" {
+                            Write-CrateProgress -Message "Opening configuration management"
+                            # TODO: Implement configuration menu (WIM paths, update sources, cache settings)
+                            Write-CrateLog -Data "Configuration management not yet implemented" -Level "Warning"
                             Read-Host "Press Enter to continue"
                         }
                         "❌ Exit" {
