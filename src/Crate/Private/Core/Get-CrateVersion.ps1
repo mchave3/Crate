@@ -14,7 +14,7 @@
     Name:        Get-CrateVersion.ps1
     Author:      Mickaël CHAVE
     Created:     27/05/2025
-    Version:     25.5.26.1
+    Version:     25.5.30.4
     Repository:  https://github.com/mchave3/Crate
     License:     MIT License
 
@@ -50,11 +50,11 @@ function Get-CrateVersion {
             }
 
             # Fallback version
-            return "25.5.26.1"
+            return "Unknown"
         }
         catch {
             Write-CrateLog -Data "Error retrieving module version: $($_.Exception.Message)" -Level 'Warning'
-            return "25.5.26.1"
+            return "Unknown"
         }
     }
 }
