@@ -1,3 +1,4 @@
+
 <#
 .SYNOPSIS
     Sets the silent mode for the Crate logging system

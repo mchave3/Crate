@@ -44,7 +44,7 @@ function Start-CrateCLI {
                         "🌐 Add Language Packs",
                         "💿 Create Provisioned ISO",
                         "📊 View Current Status",
-                        "⚙️  Configuration",
+                        "⚙️ Configuration",
                         "📋 View Logs",
                         "🧹 Cleanup Workspace",
                         "❌ Exit"
@@ -95,17 +95,17 @@ function Start-CrateCLI {
                             # TODO: Show detailed status
                             Read-Host "Press Enter to continue"
                         }
-                        "⚙️  Configuration" {
+                        "⚙️ Configuration" {
                             Write-CrateProgress -Message "Opening configuration management"
                             # TODO: Implement configuration menu
                             Write-CrateLog -Data "Configuration management not yet implemented" -Level "Warning"
                             Read-Host "Press Enter to continue"
                         }
                         "📋 View Logs" {
-                            Write-CrateProgress -Message "Opening log viewer"
-                            # TODO: Implement log viewer
-                            Write-CrateLog -Data "Log viewer not yet implemented" -Level "Warning"
-                            Read-Host "Press Enter to continue"
+                            $logPath = Join-Path -Path $Script:CrateWorkspace -ChildPath "Logs"
+                            if (Test-Path -Path $logPath) {
+                                Start-Process -FilePath "explorer.exe" -ArgumentList $logPath
+                            }
                         }
                         "🧹 Cleanup Workspace" {
                             Write-CrateLog -Data "This will clean temporary files. Continue? (y/N)" -Level "Prompt" -NoFileLog
