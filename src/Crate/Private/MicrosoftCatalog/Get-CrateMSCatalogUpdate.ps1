@@ -1,4 +1,32 @@
-function Get-MSCatalogUpdate {
+<#
+.SYNOPSIS
+    Searches and retrieves Microsoft Update Catalog updates with advanced filtering
+
+.DESCRIPTION
+    This function searches the Microsoft Update Catalog for updates based on various criteria.
+    It supports filtering by operating system, architecture, update type, date ranges, and more.
+    Results can be formatted in multiple output formats and sorted by different fields.
+
+.NOTES
+    Name:        Get-CrateMSCatalogUpdate.ps1
+    Author:      Mickaël CHAVE
+    Created:     02/06/2025
+    Version:     25.6.2.5
+    Repository:  https://github.com/mchave3/Crate
+    License:     MIT License
+
+.LINK
+    https://github.com/mchave3/Crate
+
+.EXAMPLE
+    Get-CrateMSCatalogUpdate -Search "Windows 10"
+    Searches for Windows 10 updates in the Microsoft Update Catalog
+
+.EXAMPLE
+    Get-CrateMSCatalogUpdate -OperatingSystem "Windows 11" -Version "22H2" -UpdateType "Cumulative Updates"
+    Searches for Windows 11 22H2 cumulative updates
+#>
+function Get-CrateMSCatalogUpdate {
     [CmdletBinding(DefaultParameterSetName = 'Search')]
     [OutputType([MSCatalogUpdate[]])]
     param (
@@ -113,12 +141,16 @@ function Get-MSCatalogUpdate {
 
     begin {
         #region Initialization
+        Start-CrateOperation -Operation "Microsoft Catalog Update Search"
+        Write-CrateLog -Data "Starting Microsoft Catalog update search" -Level "Info"
+
         # Ensure MSCatalogUpdate class is available
         if (-not ('MSCatalogUpdate' -as [type])) {
             $classPath = Join-Path $PSScriptRoot '..\Classes\MSCatalogUpdate.Class.ps1'
             if (Test-Path $classPath) {
                 . $classPath
             } else {
+                Write-CrateLog -Data "MSCatalogUpdate class file not found at: $classPath" -Level "Error"
                 throw "MSCatalogUpdate class file not found at: $classPath"
             }
         }
@@ -129,6 +161,7 @@ function Get-MSCatalogUpdate {
         #endregion Initialization
 
         #region Query Building
+        Write-CrateProgress -Message "Building search query"
         # Build search query based on parameters
         $searchQuery = if ($PSCmdlet.ParameterSetName -eq 'OS') {
             switch ($OperatingSystem) {
@@ -198,12 +231,14 @@ function Get-MSCatalogUpdate {
         }
 
         Write-Verbose "Search query: $searchQuery"
+        Write-CrateLog -Data "Search query: $searchQuery" -Level "Debug"
         #endregion Query Building
     }
 
     process {
         try {
             #region Search Preparation
+            Write-CrateProgress -Message "Preparing search request"
             # Prepare search query
             $EncodedSearch = switch ($true) {
                 $Strict { [uri]::EscapeDataString('"' + $searchQuery + '"') }
@@ -213,24 +248,29 @@ function Get-MSCatalogUpdate {
 
             # Initialize catalog request
             $Uri = "https://www.catalog.update.microsoft.com/Search.aspx?q=$EncodedSearch"
-            $Res = Invoke-CatalogRequest -Uri $Uri
+            Write-CrateLog -Data "Sending request to Microsoft Update Catalog" -Level "Debug"
+            $Res = Invoke-CrateCatalogRequest -Uri $Uri
             $Rows = $Res.Rows
             #endregion Search Preparation
 
             #region Pagination
             # Handle pagination
             if ($AllPages) {
+                Write-CrateProgress -Message "Processing multiple result pages"
                 $PageCount = 0
                 while ($Res.NextPage -and $PageCount -lt 39) {  # Microsoft Catalog limit is 40 pages
                     $PageCount++
+                    Write-CrateLog -Data "Fetching result page $PageCount" -Level "Debug"
                     $PageUri = "$Uri&p=$PageCount"
-                    $Res = Invoke-CatalogRequest -Uri $PageUri
+                    $Res = Invoke-CrateCatalogRequest -Uri $PageUri
                     $Rows += $Res.Rows
                 }
+                Write-CrateLog -Data "Retrieved $PageCount additional pages of results" -Level "Debug"
             }
             #endregion Pagination
 
             #region Base Filtering
+            Write-CrateProgress -Message "Filtering update results"
             # Apply base filters with improved logic
             $Rows = $Rows.Where({
                 $title = $_.SelectNodes("td")[1].InnerText.Trim()
@@ -359,12 +399,13 @@ function Get-MSCatalogUpdate {
             #endregion Architecture Filtering
 
             #region Create Update Objects
+            Write-CrateProgress -Message "Creating update objects"
             # Create MSCatalogUpdate objects with improved error handling
             $Updates = $Rows.Where({ $_.Id -ne "headerRow" }).ForEach({
                 try {
                     [MSCatalogUpdate]::new($_, $IncludeFileNames)
                 } catch {
-                    Write-Warning "Failed to process update: $($_.Exception.Message)"
+                    Write-CrateLog -Data "Failed to process update: $($_.Exception.Message)" -Level "Warning"
                     $null
                 }
             }) | Where-Object { $null -ne $_ }
@@ -403,10 +444,11 @@ function Get-MSCatalogUpdate {
             }
 
             # Display result summary
-            Write-Host "`nSearch completed for: $searchQuery"
-            Write-Host "Found $($Updates.Count) updates"
+            Write-CrateLog -Data "Search completed for: $searchQuery" -Level "Info"
+            Write-CrateLog -Data "Found $($Updates.Count) updates" -Level "Info"
+
             if ($Updates.Count -ge $MaxResults) {
-                Write-Warning "Result limit of $MaxResults reached. Please refine your search criteria."
+                Write-CrateLog -Data "Result limit of $MaxResults reached. Please refine your search criteria." -Level "Warning"
             }
 
             # Format and return results
@@ -431,11 +473,13 @@ function Get-MSCatalogUpdate {
             #endregion Sorting and Output
         }
         catch {
-            Write-Warning "Error processing search request: $($_.Exception.Message)"
+            Write-CrateLog -Data "Error processing search request: $($_.Exception.Message)" -Level "Error"
+            Complete-CrateOperation -Operation "Microsoft Catalog Update Search" -Success $false
         }
     }
 
     end {
         $ProgressPreference = "Continue"
+        Complete-CrateOperation -Operation "Microsoft Catalog Update Search" -Success $true
     }
 }
