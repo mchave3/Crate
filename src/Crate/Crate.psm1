@@ -1,9 +1,30 @@
-# this psm1 is for local testing and development use only
+#region Module Header
+# This psm1 is for local testing and development use only
+#endregion
 
-# dot source the parent import for local development variables
+#region External Dependencies
+# Load external assemblies/types before any other operations
+try {
+    if (!([System.Management.Automation.PSTypeName]'HtmlAgilityPack.HtmlDocument').Type) {
+        if ($PSVersionTable.PSEdition -eq "Desktop") {
+            Add-Type -Path "$PSScriptRoot\Types\Net45\HtmlAgilityPack.dll"
+        } else {
+            Add-Type -Path "$PSScriptRoot\Types\netstandard2.0\HtmlAgilityPack.dll"
+        }
+    }
+} catch {
+    Write-Error -Message "Failed to load HtmlAgilityPack: $_"
+    throw
+}
+#endregion
+
+#region Configuration and Imports
+# Dot source the parent import for local development variables
 . $PSScriptRoot\Imports.ps1
+#endregion
 
-# Load classes first explicitly
+#region Classes
+# Load classes first explicitly before any functions that might depend on them
 $classSplat = @{
     Filter      = '*.ps1'
     Recurse     = $true
@@ -12,7 +33,6 @@ $classSplat = @{
 
 try {
     $classes = @(Get-ChildItem -Path "$PSScriptRoot\Classes" @classSplat)
-    # Load all classes first
     foreach ($class in $classes) {
         try {
             . $class.FullName
@@ -24,37 +44,52 @@ try {
 }
 catch {
     Write-Error $_
-    throw 'Unable to load classes from Classes src.'
+    throw 'Unable to load classes from Classes directory.'
 }
+#endregion
 
-# discover all ps1 file(s) in Public and Private paths
+#region Private and Public Functions
+# Discover all ps1 file(s) in Public and Private paths
 $itemSplat = @{
     Filter      = '*.ps1'
     Recurse     = $true
     ErrorAction = 'Stop'
 }
+
 try {
-    $public = @(Get-ChildItem -Path "$PSScriptRoot\Public" @itemSplat)
     $private = @(Get-ChildItem -Path "$PSScriptRoot\Private" @itemSplat)
+    $public = @(Get-ChildItem -Path "$PSScriptRoot\Public" @itemSplat)
 }
 catch {
     Write-Error $_
-    throw 'Unable to get get file information from Public/Private src.'
+    throw 'Unable to get file information from Public/Private directories.'
 }
 
-# dot source all function files after classes are loaded
-foreach ($file in @($private + $public)) {
+# Dot source private functions first, then public functions
+foreach ($file in $private) {
     try {
         . $file.FullName
     }
     catch {
-        throw ('Unable to dot source {0}: {1}' -f $file.FullName, $_.Exception.Message)
+        throw ('Unable to dot source private function {0}: {1}' -f $file.FullName, $_.Exception.Message)
     }
 }
 
-# export all public functions
+foreach ($file in $public) {
+    try {
+        . $file.FullName
+    }
+    catch {
+        throw ('Unable to dot source public function {0}: {1}' -f $file.FullName, $_.Exception.Message)
+    }
+}
+#endregion
+
+#region Module Exports
+# Export all public functions
 Export-ModuleMember -Function $public.Basename
 
 # For development/testing purposes, also export some private functions
 #$privateToExport = @('Write-CrateLog', 'Initialize-Crate', 'Start-CrateOperation', 'Complete-CrateOperation', 'Write-CrateProgress', 'Get-CrateVersion', 'Test-CrateModuleUpdate')
 #Export-ModuleMember -Function $privateToExport
+#endregion
