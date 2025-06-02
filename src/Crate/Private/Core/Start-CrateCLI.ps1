@@ -11,7 +11,7 @@
     Name:        Start-CrateCLI.ps1
     Author:      Mickaël CHAVE
     Created:     26/05/2025
-    Version:     25.5.26.1
+    Version:     25.6.2.2
     Repository:  https://github.com/mchave3/Crate
     License:     MIT License
 
