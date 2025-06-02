@@ -34,7 +34,8 @@ function Start-CrateCLI {
                 # Initialize Crate environment
                 if (-not (Initialize-Crate -WorkspacePath "$env:ProgramData\Crate")) {
                     throw "Failed to initialize Crate environment"
-                }                # Show main interactive menu
+                }
+                # Show main interactive menu
                 do {
                     $mainMenuOptions = @(
                         "📀 Start WIM Provisioning Workflow",
