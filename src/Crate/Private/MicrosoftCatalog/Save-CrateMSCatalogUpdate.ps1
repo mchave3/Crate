@@ -86,7 +86,8 @@ function Save-CrateMSCatalogUpdate {
         # Determine extension based on URL or use .msu as default
         $extension = if ($url -match '\.(cab|exe|msi|msp|msu)$') {
             ".$($matches[1])"
-        } else {
+        }
+        else {
             ".msu"
         }
 

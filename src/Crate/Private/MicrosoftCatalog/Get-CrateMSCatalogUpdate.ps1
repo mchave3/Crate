@@ -149,7 +149,8 @@ function Get-CrateMSCatalogUpdate {
             $classPath = Join-Path $PSScriptRoot '..\Classes\MSCatalogUpdate.Class.ps1'
             if (Test-Path $classPath) {
                 . $classPath
-            } else {
+            }
+            else {
                 Write-CrateLog -Data "MSCatalogUpdate class file not found at: $classPath" -Level "Error"
                 throw "MSCatalogUpdate class file not found at: $classPath"
             }
@@ -169,13 +170,16 @@ function Get-CrateMSCatalogUpdate {
                     if ($Version) {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for Windows 10 Version $Version"
-                        } else {
+                        }
+                        else {
                             "Windows 10 Version $Version"
                         }
-                    } else {
+                    }
+                    else {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for Windows 10"
-                        } else {
+                        }
+                        else {
                             "Windows 10"
                         }
                     }
@@ -184,13 +188,16 @@ function Get-CrateMSCatalogUpdate {
                     if ($Version) {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for Windows 11 Version $Version"
-                        } else {
+                        }
+                        else {
                             "Windows 11 Version $Version"
                         }
-                    } else {
+                    }
+                    else {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for Windows 11"
-                        } else {
+                        }
+                        else {
                             "Windows 11"
                         }
                     }
@@ -199,13 +206,16 @@ function Get-CrateMSCatalogUpdate {
                     if ($Version) {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for Microsoft Server Operating System, Version $Version"
-                        } else {
+                        }
+                        else {
                             "Microsoft Server Operating System, Version $Version"
                         }
-                    } else {
+                    }
+                    else {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for Microsoft Server Operating System"
-                        } else {
+                        }
+                        else {
                             "Microsoft Server Operating System"
                         }
                     }
@@ -214,19 +224,23 @@ function Get-CrateMSCatalogUpdate {
                     if ($Version) {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for $OperatingSystem $Version"
-                        } else {
+                        }
+                        else {
                             "$OperatingSystem $Version"
                         }
-                    } else {
+                    }
+                    else {
                         if ($UpdateType -contains "Cumulative Updates") {
                             "Cumulative Update for $OperatingSystem"
-                        } else {
+                        }
+                        else {
                             "$OperatingSystem"
                         }
                     }
                 }
             }
-        } else {
+        }
+        else {
             $Search
         }
 
@@ -258,7 +272,8 @@ function Get-CrateMSCatalogUpdate {
             if ($AllPages) {
                 Write-CrateProgress -Message "Processing multiple result pages"
                 $PageCount = 0
-                while ($Res.NextPage -and $PageCount -lt 39) {  # Microsoft Catalog limit is 40 pages
+                # Microsoft Catalog limit is 40 pages
+                while ($Res.NextPage -and $PageCount -lt 39) {
                     $PageCount++
                     Write-CrateLog -Data "Fetching result page $PageCount" -Level "Debug"
                     $PageUri = "$Uri&p=$PageCount"
@@ -273,128 +288,129 @@ function Get-CrateMSCatalogUpdate {
             Write-CrateProgress -Message "Filtering update results"
             # Apply base filters with improved logic
             $Rows = $Rows.Where({
-                $title = $_.SelectNodes("td")[1].InnerText.Trim()
-                $classification = $_.SelectNodes("td")[3].InnerText.Trim()
-                $include = $true
+                    $title = $_.SelectNodes("td")[1].InnerText.Trim()
+                    $classification = $_.SelectNodes("td")[3].InnerText.Trim()
+                    $include = $true
 
-                # Basic exclusion filters
-                if (-not $IncludeDynamic -and $title -like "*Dynamic*") { $include = $false }
-                if (-not $IncludePreview -and $title -like "*Preview*") { $include = $false }
+                    # Basic exclusion filters
+                    if (-not $IncludeDynamic -and $title -like "*Dynamic*") { $include = $false }
+                    if (-not $IncludePreview -and $title -like "*Preview*") { $include = $false }
 
-                # Framework filtering: handle GetFramework and ExcludeFramework parameters
-                if ($GetFramework) {
-                    # If GetFramework is specified, only keep Framework updates
-                    if (-not ($title -like "*Framework*")) { $include = $false }
-                } elseif ($ExcludeFramework) {
-                    # If ExcludeFramework is specified, exclude Framework updates
-                    if ($title -like "*Framework*") { $include = $false }
-                }
-
-                # OS and Version specific filtering
-                if ($PSCmdlet.ParameterSetName -eq 'OS') {
-                    if ($OperatingSystem -eq "Windows Server") {
-                        # For Server, look for "Microsoft server" or similar patterns
-                        if (-not ($title -like "*Microsoft*Server*" -or $title -like "*Server Operating System*")) { $include = $false }
+                    # Framework filtering: handle GetFramework and ExcludeFramework parameters
+                    if ($GetFramework) {
+                        # If GetFramework is specified, only keep Framework updates
+                        if (-not ($title -like "*Framework*")) { $include = $false }
                     }
-                    else {
-                        # For other OS types, use the standard pattern
-                        if (-not ($title -like "*$OperatingSystem*")) { $include = $false }
+                    elseif ($ExcludeFramework) {
+                        # If ExcludeFramework is specified, exclude Framework updates
+                        if ($title -like "*Framework*") { $include = $false }
                     }
-                    if ($Version -and -not ($title -like "*$Version*")) { $include = $false }
-                }
 
-                # Update type filtering
-                if ($UpdateType) {
-                    $hasMatchingType = $false
-                    foreach ($type in $UpdateType) {
-                        switch ($type) {
-                            "Security Updates" {
-                                # In the Classification column
-                                if ($classification -eq "Security Updates") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Cumulative Updates" {
-                                # In the title, look for "Cumulative Update"
-                                if ($title -like "*Cumulative Update*") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Critical Updates" {
-                                # In the Classification column
-                                if ($classification -eq "Critical Updates") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Updates" {
-                                # In the Classification column
-                                if ($classification -eq "Updates") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Feature Packs" {
-                                # In the Classification column
-                                if ($classification -eq "Feature Packs") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Service Packs" {
-                                # In the Classification column
-                                if ($classification -eq "Service Packs") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Tools" {
-                                # In the Classification column
-                                if ($classification -eq "Tools") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Update Rollups" {
-                                # In the Classification column
-                                if ($classification -eq "Update Rollups") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Security Quality Updates" {
-                                # Combines security and quality
-                                if (($classification -eq "Security Updates") -and
-                                    ($title -like "*Quality Update*")) {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            "Driver Updates" {
-                                # For drivers
-                                if ($title -like "*Driver*") {
-                                    $hasMatchingType = $true
-                                }
-                            }
-                            default {
-                                if ($title -like "*$type*") {
-                                    $hasMatchingType = $true
-                                }
-                            }
+                    # OS and Version specific filtering
+                    if ($PSCmdlet.ParameterSetName -eq 'OS') {
+                        if ($OperatingSystem -eq "Windows Server") {
+                            # For Server, look for "Microsoft server" or similar patterns
+                            if (-not ($title -like "*Microsoft*Server*" -or $title -like "*Server Operating System*")) { $include = $false }
                         }
-                        if ($hasMatchingType) { break }
+                        else {
+                            # For other OS types, use the standard pattern
+                            if (-not ($title -like "*$OperatingSystem*")) { $include = $false }
+                        }
+                        if ($Version -and -not ($title -like "*$Version*")) { $include = $false }
                     }
-                    if (-not $hasMatchingType) { $include = $false }
-                }
 
-                $include
-            })
+                    # Update type filtering
+                    if ($UpdateType) {
+                        $hasMatchingType = $false
+                        foreach ($type in $UpdateType) {
+                            switch ($type) {
+                                "Security Updates" {
+                                    # In the Classification column
+                                    if ($classification -eq "Security Updates") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Cumulative Updates" {
+                                    # In the title, look for "Cumulative Update"
+                                    if ($title -like "*Cumulative Update*") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Critical Updates" {
+                                    # In the Classification column
+                                    if ($classification -eq "Critical Updates") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Updates" {
+                                    # In the Classification column
+                                    if ($classification -eq "Updates") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Feature Packs" {
+                                    # In the Classification column
+                                    if ($classification -eq "Feature Packs") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Service Packs" {
+                                    # In the Classification column
+                                    if ($classification -eq "Service Packs") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Tools" {
+                                    # In the Classification column
+                                    if ($classification -eq "Tools") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Update Rollups" {
+                                    # In the Classification column
+                                    if ($classification -eq "Update Rollups") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Security Quality Updates" {
+                                    # Combines security and quality
+                                    if (($classification -eq "Security Updates") -and
+                                        ($title -like "*Quality Update*")) {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                "Driver Updates" {
+                                    # For drivers
+                                    if ($title -like "*Driver*") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                                default {
+                                    if ($title -like "*$type*") {
+                                        $hasMatchingType = $true
+                                    }
+                                }
+                            }
+                            if ($hasMatchingType) { break }
+                        }
+                        if (-not $hasMatchingType) { $include = $false }
+                    }
+
+                    $include
+                })
             #endregion Base Filtering
 
             #region Architecture Filtering
             # Apply architecture filter with improved logic
             if ($Architecture -ne "all") {
                 $Rows = $Rows.Where({
-                    $title = $_.SelectNodes("td")[1].InnerText.Trim()
-                    switch ($Architecture) {
-                        "x64" { $title -match "x64|64.?bit|64.?based" -and -not ($title -match "x86|32.?bit|arm64") }
-                        "x86" { $title -match "x86|32.?bit|32.?based" -and -not ($title -match "64.?bit|arm64") }
-                        "arm64" { $title -match "arm64|ARM.?based" }
-                    }
-                })
+                        $title = $_.SelectNodes("td")[1].InnerText.Trim()
+                        switch ($Architecture) {
+                            "x64" { $title -match "x64|64.?bit|64.?based" -and -not ($title -match "x86|32.?bit|arm64") }
+                            "x86" { $title -match "x86|32.?bit|32.?based" -and -not ($title -match "64.?bit|arm64") }
+                            "arm64" { $title -match "arm64|ARM.?based" }
+                        }
+                    })
             }
             #endregion Architecture Filtering
 
@@ -402,13 +418,14 @@ function Get-CrateMSCatalogUpdate {
             Write-CrateProgress -Message "Creating update objects"
             # Create MSCatalogUpdate objects with improved error handling
             $Updates = $Rows.Where({ $_.Id -ne "headerRow" }).ForEach({
-                try {
-                    [MSCatalogUpdate]::new($_, $IncludeFileNames)
-                } catch {
-                    Write-CrateLog -Data "Failed to process update: $($_.Exception.Message)" -Level "Warning"
-                    $null
-                }
-            }) | Where-Object { $null -ne $_ }
+                    try {
+                        [MSCatalogUpdate]::new($_, $IncludeFileNames)
+                    }
+                    catch {
+                        Write-CrateLog -Data "Failed to process update: $($_.Exception.Message)" -Level "Warning"
+                        $null
+                    }
+                }) | Where-Object { $null -ne $_ }
             #endregion Create Update Objects
 
             #region Apply Filters
@@ -424,11 +441,11 @@ function Get-CrateMSCatalogUpdate {
             if ($MinSize -or $MaxSize) {
                 $Multiplier = if ($SizeUnit -eq "GB") { 1024 } else { 1 }
                 $Updates = $Updates.Where({
-                    $size = [double]($_.Size -replace ' MB$','')
-                    $meetsMin = -not $MinSize -or $size -ge ($MinSize * $Multiplier)
-                    $meetsMax = -not $MaxSize -or $size -le ($MaxSize * $Multiplier)
-                    $meetsMin -and $meetsMax
-                })
+                        $size = [double]($_.Size -replace ' MB$','')
+                        $meetsMin = -not $MinSize -or $size -ge ($MinSize * $Multiplier)
+                        $meetsMax = -not $MaxSize -or $size -le ($MaxSize * $Multiplier)
+                        $meetsMin -and $meetsMax
+                    })
             }
             #endregion Apply Filters
 

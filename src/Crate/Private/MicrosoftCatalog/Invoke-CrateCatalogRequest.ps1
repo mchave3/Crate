@@ -40,10 +40,10 @@ function Invoke-CrateCatalogRequest {
         }
 
         $Params = @{
-            Uri = $Uri
+            Uri             = $Uri
             UseBasicParsing = $true
-            ErrorAction = "Stop"
-            Headers = $Headers
+            ErrorAction     = "Stop"
+            Headers         = $Headers
         }
 
         Write-CrateLog -Data "Sending web request to Microsoft Update Catalog" -Level "Debug"
@@ -56,20 +56,25 @@ function Invoke-CrateCatalogRequest {
         if ($null -eq $NoResults -and $null -eq $ErrorText) {
             Write-CrateLog -Data "Successfully received catalog response" -Level "Debug"
             return [MSCatalogResponse]::new($HtmlDoc)
-        } elseif ($ErrorText) {
+        }
+        elseif ($ErrorText) {
             if ($ErrorText.InnerText -match '8DDD0010') {
                 Write-CrateLog -Data "Microsoft Update Catalog error 8DDD0010 encountered" -Level "Error"
                 throw "The catalog.microsoft.com site has encountered an error with code 8DDD0010. Please try again later."
-            } else {
+            }
+            else {
                 Write-CrateLog -Data "Microsoft Update Catalog error: $($ErrorText.InnerText)" -Level "Error"
                 throw "The catalog.microsoft.com site has encountered an error: $($ErrorText.InnerText)"
             }
-        } else {
+        }
+        else {
             Write-CrateLog -Data "No results found for $Uri" -Level "Warning"
         }
-    } catch {
+    }
+    catch {
         Write-CrateLog -Data "Error during catalog request: $_" -Level "Error"
-    } finally {
-       Set-CrateTempSecurityProtocol -ResetToDefault
+    }
+    finally {
+        Set-CrateTempSecurityProtocol -ResetToDefault
     }
 }

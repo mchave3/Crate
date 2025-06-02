@@ -8,11 +8,13 @@ try {
     if (!([System.Management.Automation.PSTypeName]'HtmlAgilityPack.HtmlDocument').Type) {
         if ($PSVersionTable.PSEdition -eq "Desktop") {
             Add-Type -Path "$PSScriptRoot\Types\Net45\HtmlAgilityPack.dll"
-        } else {
+        }
+        else {
             Add-Type -Path "$PSScriptRoot\Types\netstandard2.0\HtmlAgilityPack.dll"
         }
     }
-} catch {
+}
+catch {
     Write-Error -Message "Failed to load HtmlAgilityPack: $_"
     throw
 }

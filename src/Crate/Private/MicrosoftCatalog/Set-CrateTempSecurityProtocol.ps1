@@ -38,7 +38,8 @@ function Set-CrateTempSecurityProtocol {
                 [Net.ServicePointManager]::SecurityProtocol = $Script:MSCatalogSecProt
                 Write-CrateLog -Data "Security protocol reset to: $($Script:MSCatalogSecProt)" -Level "Debug"
             }
-        } else {
+        }
+        else {
             if ($null -eq $Script:MSCatalogSecProt) {
                 $Script:MSCatalogSecProt = [Net.ServicePointManager]::SecurityProtocol
                 Write-CrateLog -Data "Original security protocol stored: $($Script:MSCatalogSecProt)" -Level "Debug"

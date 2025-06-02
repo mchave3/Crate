@@ -13,3 +13,6 @@ Windows ISO Provisioning Tool - Modern CLI interface for mounting, provisioning,
 ## Crate Cmdlets
 ### [Start-Crate](Start-Crate.md)
 Starts the Crate provisioning tool in a new PowerShell window.
+
+### [Test-Update](Test-Update.md)
+Test function to demonstrate MSCatalog update search functionality

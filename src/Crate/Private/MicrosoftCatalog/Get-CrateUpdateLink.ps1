@@ -37,9 +37,9 @@ function Get-CrateUpdateLink {
     $Body = @{UpdateIDs = "[$Post]"}
 
     $Params = @{
-        Uri = "https://www.catalog.update.microsoft.com/DownloadDialog.aspx"
-        Body = $Body
-        ContentType = "application/x-www-form-urlencoded"
+        Uri             = "https://www.catalog.update.microsoft.com/DownloadDialog.aspx"
+        Body            = $Body
+        ContentType     = "application/x-www-form-urlencoded"
         UseBasicParsing = $true
     }
 

@@ -1,5 +1,5 @@
 class MSCatalogResponse {
-    [HtmlAgilityPack.HtmlNode[]] $Rows
+    [object[]] $Rows
     [string] $EventArgument
     [string] $EventValidation
     [string] $ViewState
